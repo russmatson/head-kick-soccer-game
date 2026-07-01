@@ -10,10 +10,11 @@
   #gameCanvas { display: block; }
   #ui { position: fixed; top: 10px; left: 10px; color: #fff; font-size: 22px; text-shadow: 2px 2px 0 #000; pointer-events: none; }
   #score-display { color: #ffd700; font-size: 28px; }
-  #oneliner { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #00ffcc; font-size: 20px; padding: 12px 24px; border-radius: 10px; border: 2px solid #00ffcc; text-align: center; max-width: 90vw; display: none; pointer-events: none; font-style: italic; }
-  #dance-label { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; color: #ff69b4; text-shadow: 3px 3px 0 #000; display: none; pointer-events: none; text-align: center; }
+  #oneliner { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #00ffcc; font-size: 18px; padding: 12px 24px; border-radius: 10px; border: 2px solid #00ffcc; text-align: center; max-width: 80vw; display: none; pointer-events: none; font-style: italic; }
+  #dance-label { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); font-size: 42px; color: #ff69b4; text-shadow: 3px 3px 0 #000; display: none; pointer-events: none; text-align: center; white-space: nowrap; }
   #instructions { position: fixed; top: 10px; right: 10px; color: #aaa; font-size: 14px; text-align: right; pointer-events: none; }
   #combo { position: fixed; top: 80px; left: 10px; color: #ff4500; font-size: 36px; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
+  #anti-rent-banner { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(180,0,0,0.92); color: #fff; font-size: 17px; padding: 13px 28px; border-radius: 10px; border: 2px solid #ff4444; text-align: center; max-width: 78vw; display: none; pointer-events: none; font-weight: bold; }
   .speech-bubble { position: fixed; background: #fff; color: #111; font-size: 13px; font-family: Arial, sans-serif; font-weight: bold; padding: 10px 14px; border-radius: 14px; border: 3px solid #c0392b; max-width: 200px; text-align: center; pointer-events: none; z-index: 999; box-shadow: 3px 3px 0 rgba(0,0,0,0.3); line-height: 1.4; transition: opacity 0.4s; }
   .speech-bubble::after { content: ''; position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: #c0392b; }
   .speech-bubble::before { content: ''; position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: #fff; z-index: 1; }
@@ -28,17 +29,21 @@
 <div id="combo"></div>
 <div id="oneliner"></div>
 <div id="dance-label"></div>
-<div id="instructions">CLICK heads to KICK them!<br>Every 5 kicks = DANCE PARTY!</div>
+<div id="anti-rent-banner"></div>
+<div id="instructions">CLICK heads to KICK them!<br>Every 5 kicks = PLAYER DANCE PARTY!</div>
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
 let score = 0, kickCount = 0, comboCount = 0, comboTimer = null;
 let heads = [], particles = [], floatingTexts = [], isDancing = false;
 const activeBubbles = [];
+
 const FACE_EMOJIS = ['😀','😂','😎','🤓','😤','😡','🥴','🤪','😱','🤯','👀','😈','🤡','👹','💀'];
+
 const RENT_CONTROL_QUOTES = [
   "Rent control keeps families in their homes!",
   "Housing is a human RIGHT, not a commodity!",
@@ -59,19 +64,187 @@ const RENT_CONTROL_QUOTES = [
   "Pass the Tenant Protection Act... OW!",
   "Landlords don't build communities — TENANTS do!",
 ];
+
+const ANTI_RENT_CONTROL_LINERS = [
+  "Rent control: making housing scarce since forever. Supply and demand still exists!",
+  "Nothing says 'affordable city' like rent control driving away new construction!",
+  "Sweden tried rent control. Result: 20-year waitlists. Nice work, guys!",
+  "Rent control is just a subsidy for people lucky enough to already have apartments.",
+  "Pro tip: the best way to destroy a city's housing stock is rent control.",
+  "Economists left AND right agree: rent control reduces housing supply. Math is hard!",
+  "Rent control: where the winners are current tenants and the losers are everyone else.",
+  "Nothing motivates landlords to let buildings rot quite like rent control!",
+  "San Francisco has had rent control since 1979. Still the least affordable city. Curious!",
+  "Rent control creates housing black markets. Congratulations, you played yourself.",
+  "When you cap rent, investors build offices instead. Hope you like commuting!",
+  "97% of economists oppose rent control. But sure, the heads know better.",
+  "Rent control: taking housing meant for families and giving it to the already-housed.",
+  "New York's rent-stabilized apartments turn over once every 28 years. Very helpful!",
+  "Freezing prices doesn't freeze costs. Landlords just stop maintaining buildings!",
+  "Rent control reduces rental supply by 15% per Stanford study. But feelings!",
+  "Want more housing? Build more housing. Want less? Rent control!",
+  "Rent control is a great way to ensure YOUR apartment is affordable and nobody else's.",
+];
+
+// Decade dances with player animation data
 const DECADEDANCES = [
-  { decade: '1950s', name: 'THE TWIST!', emoji: '🕺', color: '#ff6b35' },
-  { decade: '1960s', name: 'THE MASHED POTATO!', emoji: '💃', color: '#f7931e' },
-  { decade: '1970s', name: 'DISCO FEVER!', emoji: '🪩', color: '#ffd700' },
-  { decade: '1980s', name: 'THE RUNNING MAN!', emoji: '🏃', color: '#00ff41' },
-  { decade: '1990s', name: 'THE MACARENA!', emoji: '🙌', color: '#00bfff' },
-  { decade: '2000s', name: 'THE SOULJA BOY!', emoji: '✈️', color: '#9b59b6' },
-  { decade: '2010s', name: 'THE FLOSS!', emoji: '🦷', color: '#ff1493' },
-  { decade: '2020s', name: 'THE GRIDDY!', emoji: '🏈', color: '#00ffcc' },
+  { decade: '1950s', name: 'THE TWIST!', emoji: '🕺', color: '#ff6b35', move: 'twist' },
+  { decade: '1960s', name: 'THE MASHED POTATO!', emoji: '💃', color: '#f7931e', move: 'mash' },
+  { decade: '1970s', name: 'DISCO FEVER!', emoji: '🪩', color: '#ffd700', move: 'disco' },
+  { decade: '1980s', name: 'THE RUNNING MAN!', emoji: '🏃', color: '#00ff41', move: 'run' },
+  { decade: '1990s', name: 'THE MACARENA!', emoji: '🙌', color: '#00bfff', move: 'macarena' },
+  { decade: '2000s', name: 'THE SOULJA BOY!', emoji: '✈️', color: '#9b59b6', move: 'soulja' },
+  { decade: '2010s', name: 'THE FLOSS!', emoji: '🦷', color: '#ff1493', move: 'floss' },
+  { decade: '2020s', name: 'THE GRIDDY!', emoji: '🏈', color: '#00ffcc', move: 'griddy' },
 ];
+
 const ONE_LINERS = [
-  "Head above water? Not anymore!","I told you to use your head... not LOSE it!","That's what I call a HEADER!","You've been de-capitated!","Heads will roll... and SCORE!","GOOOOOAL! Also, OUCH!","Keep your head in the game? Too late!","Don't worry, it'll grow back. Probably.","Nothing but net... and skull.","I'd say sorry, but that would be lying.",
+  "Head above water? Not anymore!","I told you to use your head... not LOSE it!","That's what I call a HEADER!",
+  "You've been de-capitated!","Heads will roll... and SCORE!","GOOOOOAL! Also, OUCH!",
+  "Keep your head in the game? Too late!","Don't worry, it'll grow back. Probably.",
+  "Nothing but net... and skull.","I'd say sorry, but that would be lying.",
 ];
+
+// ─── PLAYER DANCER ───────────────────────────────────────────────────
+const player = {
+  x: 0, y: 0,       // set in draw
+  dancing: false,
+  dance: null,
+  danceFrame: 0,
+  danceTimer: 0,
+  danceDuration: 180, // frames
+};
+
+function drawStickFigure(x, y, t, move, color) {
+  ctx.save();
+  ctx.strokeStyle = color || '#fff';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+
+  const s = 28; // scale
+  let lArmAng, rArmAng, lLegAng, rLegAng, bodyTilt, hipShift;
+
+  // Default neutral
+  lArmAng = -Math.PI/4; rArmAng = -Math.PI*3/4;
+  lLegAng = Math.PI/8;  rLegAng = -Math.PI/8;
+  bodyTilt = 0; hipShift = 0;
+
+  const bounce = Math.sin(t * 0.3) * 4;
+
+  if (move === 'twist') {
+    bodyTilt = Math.sin(t * 0.2) * 0.3;
+    hipShift = Math.sin(t * 0.2) * 10;
+    lArmAng = -Math.PI/3 + Math.sin(t*0.2)*0.5;
+    rArmAng = -Math.PI*2/3 + Math.sin(t*0.2)*0.5;
+    lLegAng = Math.PI/5 + Math.sin(t*0.2)*0.2;
+    rLegAng = -Math.PI/5 - Math.sin(t*0.2)*0.2;
+  } else if (move === 'mash') {
+    lLegAng = Math.PI/4 + Math.sin(t*0.25)*0.3;
+    rLegAng = -Math.PI/4 - Math.sin(t*0.25)*0.3;
+    lArmAng = -Math.PI/2 + Math.cos(t*0.25)*0.4;
+    rArmAng = -Math.PI/2 - Math.cos(t*0.25)*0.4;
+    hipShift = Math.sin(t*0.5)*6;
+  } else if (move === 'disco') {
+    // Travolta point — one arm way up
+    const phase = Math.floor(t / 15) % 2;
+    lArmAng = phase === 0 ? -Math.PI*0.9 : -Math.PI/6;
+    rArmAng = phase === 0 ? -Math.PI/6 : -Math.PI*0.9;
+    lLegAng = Math.PI/6 + Math.sin(t*0.3)*0.2;
+    rLegAng = -Math.PI/6 - Math.sin(t*0.3)*0.2;
+    hipShift = Math.sin(t*0.3)*8;
+  } else if (move === 'run') {
+    lArmAng = -Math.PI/2 + Math.sin(t*0.4)*0.6;
+    rArmAng = -Math.PI/2 - Math.sin(t*0.4)*0.6;
+    lLegAng = Math.PI/3 * Math.sin(t*0.4+Math.PI);
+    rLegAng = Math.PI/3 * Math.sin(t*0.4);
+    hipShift = Math.sin(t*0.4)*5;
+  } else if (move === 'macarena') {
+    const step = Math.floor(t / 12) % 8;
+    if (step === 0) { lArmAng=-Math.PI/6; rArmAng=-Math.PI*5/6; }
+    else if (step === 1) { lArmAng=-Math.PI/6; rArmAng=-Math.PI/6; }
+    else if (step === 2) { lArmAng=-Math.PI/2; rArmAng=-Math.PI/6; }
+    else if (step === 3) { lArmAng=-Math.PI/2; rArmAng=-Math.PI/2; }
+    else if (step === 4) { lArmAng=-Math.PI*3/4; rArmAng=-Math.PI/2; }
+    else if (step === 5) { lArmAng=-Math.PI*3/4; rArmAng=-Math.PI*3/4; }
+    else { lArmAng=-Math.PI/2; rArmAng=-Math.PI/2; hipShift=12; }
+    lLegAng = Math.PI/10; rLegAng=-Math.PI/10;
+  } else if (move === 'soulja') {
+    // Arms out like a plane
+    lArmAng = -Math.PI/2 + Math.sin(t*0.3)*0.15;
+    rArmAng = -Math.PI/2 + Math.sin(t*0.3)*0.15;
+    // Cranking lean
+    bodyTilt = Math.sin(t*0.2)*0.15;
+    lLegAng = Math.PI/6 + Math.sin(t*0.35)*0.3;
+    rLegAng = -Math.PI/6 - Math.sin(t*0.35)*0.3;
+    hipShift = Math.sin(t*0.35)*7;
+  } else if (move === 'floss') {
+    // Arms swing side to side in floss pattern
+    const fPhase = Math.sin(t*0.25);
+    lArmAng = -Math.PI/2 + fPhase*1.0;
+    rArmAng = -Math.PI/2 + fPhase*1.0;
+    hipShift = fPhase * 14;
+    lLegAng = Math.PI/10; rLegAng=-Math.PI/10;
+  } else if (move === 'griddy') {
+    // High-step march with arm pump
+    lLegAng = Math.PI/3 * Math.max(0, Math.sin(t*0.35+Math.PI));
+    rLegAng = Math.PI/3 * Math.max(0, Math.sin(t*0.35));
+    lArmAng = -Math.PI/2 - Math.sin(t*0.35+Math.PI)*0.5;
+    rArmAng = -Math.PI/2 + Math.sin(t*0.35+Math.PI)*0.5;
+    hipShift = Math.sin(t*0.35)*6;
+    bodyTilt = Math.sin(t*0.35)*0.08;
+  }
+
+  ctx.translate(x + hipShift, y + bounce);
+  ctx.rotate(bodyTilt);
+
+  // Head
+  ctx.beginPath();
+  ctx.arc(0, -s*2.2, s*0.5, 0, Math.PI*2);
+  ctx.fillStyle = '#ffe0b2';
+  ctx.fill();
+  ctx.stroke();
+
+  // Eyes
+  ctx.fillStyle = '#333';
+  ctx.beginPath(); ctx.arc(-7, -s*2.35, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(7, -s*2.35, 2.5, 0, Math.PI*2); ctx.fill();
+
+  // Smile
+  ctx.beginPath();
+  ctx.arc(0, -s*2.1, 8, 0.1, Math.PI-0.1);
+  ctx.stroke();
+
+  // Body
+  ctx.beginPath(); ctx.moveTo(0, -s*1.7); ctx.lineTo(0, 0); ctx.stroke();
+
+  // Left arm
+  ctx.beginPath();
+  ctx.moveTo(0, -s*1.4);
+  ctx.lineTo(Math.cos(lArmAng)*s*1.1, -s*1.4 + Math.sin(lArmAng)*s*1.1);
+  ctx.stroke();
+
+  // Right arm
+  ctx.beginPath();
+  ctx.moveTo(0, -s*1.4);
+  ctx.lineTo(Math.cos(rArmAng)*s*1.1, -s*1.4 + Math.sin(rArmAng)*s*1.1);
+  ctx.stroke();
+
+  // Left leg
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(Math.cos(Math.PI/2 + lLegAng)*s, Math.sin(Math.PI/2 + lLegAng)*s);
+  ctx.stroke();
+
+  // Right leg
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(Math.cos(Math.PI/2 + rLegAng)*s, Math.sin(Math.PI/2 + rLegAng)*s);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// ─── SPEECH BUBBLES ──────────────────────────────────────────────────
 function showSpeechBubble(head, text) {
   const el = document.createElement('div');
   el.className = 'speech-bubble';
@@ -79,6 +252,7 @@ function showSpeechBubble(head, text) {
   document.body.appendChild(el);
   activeBubbles.push({ el, head, createdAt: Date.now(), duration: 4500 });
 }
+
 function updateBubbles() {
   const now = Date.now();
   for (let i = activeBubbles.length - 1; i >= 0; i--) {
@@ -91,6 +265,8 @@ function updateBubbles() {
     b.el.style.top = (b.head.y - b.head.size - hh - 14) + 'px';
   }
 }
+
+// ─── HEADS ───────────────────────────────────────────────────────────
 function spawnHead() {
   const size = 50 + Math.random() * 40;
   const emoji = FACE_EMOJIS[Math.floor(Math.random() * FACE_EMOJIS.length)];
@@ -100,66 +276,107 @@ function spawnHead() {
   else if (side === 1) { x = canvas.width + size; y = Math.random() * canvas.height; }
   else if (side === 2) { x = Math.random() * canvas.width; y = -size; }
   else { x = Math.random() * canvas.width; y = canvas.height + size; }
-  const targetX = canvas.width * 0.3 + Math.random() * canvas.width * 0.4;
-  const targetY = canvas.height * 0.3 + Math.random() * canvas.height * 0.4;
-  const dx = (targetX - x) / (100 + Math.random() * 100);
-  const dy = (targetY - y) / (100 + Math.random() * 100);
-  heads.push({ x, y, size, dx, dy, emoji, rotation: 0, rotSpeed: (Math.random()-0.5)*0.1, bounces: 0, kicked: false });
+  const tx = canvas.width * 0.3 + Math.random() * canvas.width * 0.4;
+  const ty = canvas.height * 0.3 + Math.random() * canvas.height * 0.4;
+  const dx = (tx - x) / (100 + Math.random() * 100);
+  const dy = (ty - y) / (100 + Math.random() * 100);
+  heads.push({ x, y, size, dx, dy, emoji, rotation: 0, rotSpeed: (Math.random()-0.5)*0.1, kicked: false });
 }
+
 function spawnParticles(x, y, color) {
   for (let i = 0; i < 20; i++) {
-    const angle = Math.random() * Math.PI * 2, speed = 3 + Math.random() * 8;
-    particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1, decay: 0.03+Math.random()*0.04, size: 4+Math.random()*8, color: color||('hsl('+(Math.random()*360)+',100%,60%)') });
+    const a = Math.random()*Math.PI*2, sp = 3+Math.random()*8;
+    particles.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, decay: 0.03+Math.random()*0.04, size: 4+Math.random()*8, color: color||('hsl('+(Math.random()*360)+',100%,60%)') });
   }
 }
-function addFloatingText(x, y, text, color) { floatingTexts.push({ x, y, text, color: color||'#fff', life: 1, vy: -2, size: 24 }); }
+
+function addFloatingText(x, y, text, color) {
+  floatingTexts.push({ x, y, text, color: color||'#fff', life: 1, vy: -2, size: 24 });
+}
+
 function kickHead(head, mx, my) {
-  const dx = head.x - mx, dy = head.y - my, dist = Math.sqrt(dx*dx+dy*dy)||1;
-  const force = 15 + Math.random() * 10;
+  const dx = head.x-mx, dy = head.y-my, dist = Math.sqrt(dx*dx+dy*dy)||1;
+  const force = 15 + Math.random()*10;
   head.dx = (dx/dist)*force; head.dy = (dy/dist)*force;
   head.rotSpeed = (Math.random()-0.5)*0.4;
   head.kicked = true; head.kickTimer = 200;
   kickCount++; comboCount++;
   clearTimeout(comboTimer);
-  comboTimer = setTimeout(() => { comboCount = 0; updateCombo(); }, 1500);
-  const pts = comboCount * 100;
+  comboTimer = setTimeout(() => { comboCount=0; updateCombo(); }, 1500);
+  const pts = comboCount*100;
   score += pts;
   document.getElementById('score').textContent = score;
   document.getElementById('kicks').textContent = kickCount;
   updateCombo();
   spawnParticles(head.x, head.y);
-  addFloatingText(head.x, head.y - head.size, comboCount > 1 ? 'x'+comboCount+' +'+pts : '+'+pts, comboCount > 2 ? '#ffd700' : '#fff');
+  addFloatingText(head.x, head.y-head.size, comboCount>1?'x'+comboCount+' +'+pts:'+'+pts, comboCount>2?'#ffd700':'#fff');
   showSpeechBubble(head, RENT_CONTROL_QUOTES[Math.floor(Math.random()*RENT_CONTROL_QUOTES.length)]);
   if (kickCount % 5 === 0) triggerDanceParty(); else showOneLiner();
 }
+
 function updateCombo() {
   const el = document.getElementById('combo');
-  if (comboCount > 1) { el.style.display='block'; el.textContent='COMBO x'+comboCount+'!'; } else el.style.display='none';
+  if (comboCount>1){el.style.display='block';el.textContent='COMBO x'+comboCount+'!';}else el.style.display='none';
 }
+
 function showOneLiner() {
   const el = document.getElementById('oneliner');
-  el.textContent = '"' + ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)] + '"';
+  el.textContent = '"'+ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)]+'"';
   el.style.display='block'; clearTimeout(window._oneTimeout);
-  window._oneTimeout = setTimeout(() => { el.style.display='none'; }, 3000);
+  window._oneTimeout = setTimeout(()=>{el.style.display='none';},3000);
 }
+
+function showAntiRentLiner(dance) {
+  const el = document.getElementById('anti-rent-banner');
+  const liner = ANTI_RENT_CONTROL_LINERS[Math.floor(Math.random()*ANTI_RENT_CONTROL_LINERS.length)];
+  el.textContent = '🎤 "' + liner + '"';
+  el.style.borderColor = dance.color;
+  el.style.display = 'block';
+  clearTimeout(window._antiTimeout);
+  window._antiTimeout = setTimeout(()=>{el.style.display='none';}, 5000);
+}
+
 function triggerDanceParty() {
+  if (isDancing) return;
   isDancing = true;
   const dance = DECADEDANCES[Math.floor(Math.random()*DECADEDANCES.length)];
+
+  // Show dance label
   const el = document.getElementById('dance-label');
-  el.innerHTML = dance.emoji+' '+dance.decade+' '+dance.emoji+'<br><span style="color:'+dance.color+'">'+dance.name+'</span>';
-  el.style.display='block';
+  el.innerHTML = dance.emoji+' '+dance.decade+' — '+dance.name+' '+dance.emoji;
+  el.style.color = dance.color;
+  el.style.display = 'block';
+
+  // Activate player dancer
+  player.dancing = true;
+  player.dance = dance;
+  player.danceFrame = 0;
+  player.danceDuration = 180;
+
+  // Heads also bounce around
   heads.forEach(h => { h.dancing=true; h.danceAngle=Math.random()*Math.PI*2; h.danceSpeed=0.05+Math.random()*0.05; });
-  for (let i=0;i<5;i++) setTimeout(()=>spawnParticles(Math.random()*canvas.width,Math.random()*canvas.height,'hsl('+(Math.random()*360)+',100%,60%)'),i*200);
-  const liner = document.getElementById('oneliner');
-  liner.textContent = '"'+ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)]+'"'; liner.style.display='block';
-  setTimeout(() => { el.style.display='none'; heads.forEach(h=>{h.dancing=false;}); isDancing=false; clearTimeout(window._oneTimeout); window._oneTimeout=setTimeout(()=>{liner.style.display='none';},2000); }, 3000);
+  for (let i=0;i<6;i++) setTimeout(()=>spawnParticles(Math.random()*canvas.width,Math.random()*canvas.height,'hsl('+(Math.random()*360)+',100%,60%)'),i*150);
+
+  // After dance, show anti-rent-control one-liner
+  setTimeout(() => {
+    el.style.display='none';
+    heads.forEach(h=>{h.dancing=false;});
+    player.dancing = false;
+    isDancing = false;
+    showAntiRentLiner(dance);
+  }, 3100);
 }
+
 canvas.addEventListener('click', (e) => {
-  const rect = canvas.getBoundingClientRect(), mx = e.clientX-rect.left, my = e.clientY-rect.top;
-  let hit = false;
-  for (let i=heads.length-1;i>=0;i--) { const h=heads[i]; if(Math.sqrt((h.x-mx)**2+(h.y-my)**2)<h.size){kickHead(h,mx,my);hit=true;break;} }
-  if (!hit) { spawnParticles(mx,my,'#ff0000'); addFloatingText(mx,my,'MISS!','#ff4444'); comboCount=0; updateCombo(); }
+  const rect=canvas.getBoundingClientRect(), mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  let hit=false;
+  for (let i=heads.length-1;i>=0;i--){
+    const h=heads[i];
+    if(Math.sqrt((h.x-mx)**2+(h.y-my)**2)<h.size){kickHead(h,mx,my);hit=true;break;}
+  }
+  if(!hit){spawnParticles(mx,my,'#ff0000');addFloatingText(mx,my,'MISS!','#ff4444');comboCount=0;updateCombo();}
 });
+
 function drawHead(h) {
   ctx.save(); ctx.translate(h.x,h.y); ctx.rotate(h.rotation);
   ctx.beginPath(); ctx.arc(4,4,h.size,0,Math.PI*2); ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fill();
@@ -169,14 +386,21 @@ function drawHead(h) {
   ctx.font=(h.size*1.1)+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(h.kicked?'🗣️':h.emoji,0,2); ctx.restore();
 }
-let spawnTimer=0;
+
+let spawnTimer=0, frameCount=0;
 function gameLoop() {
+  frameCount++;
   ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Grid bg
   ctx.strokeStyle='rgba(255,255,255,0.03)'; ctx.lineWidth=1;
   for(let x=0;x<canvas.width;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
   for(let y=0;y<canvas.height;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+
   spawnTimer++;
   if(spawnTimer>90&&heads.length<12){spawnHead();spawnTimer=0;}
+
+  // Heads
   for(let i=heads.length-1;i>=0;i--){
     const h=heads[i];
     if(h.dancing){h.danceAngle+=h.danceSpeed;h.x+=Math.cos(h.danceAngle)*3;h.y+=Math.sin(h.danceAngle*1.3)*3;}
@@ -190,21 +414,54 @@ function gameLoop() {
     drawHead(h);
     if(!h.kicked&&!h.dancing&&(h.x<-200||h.x>canvas.width+200||h.y<-200||h.y>canvas.height+200))heads.splice(i,1);
   }
+
+  // Particles
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.2;p.life-=p.decay;
     if(p.life<=0){particles.splice(i,1);continue;}
     ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.life;ctx.fill();ctx.globalAlpha=1;
   }
+
+  // Floating texts
   for(let i=floatingTexts.length-1;i>=0;i--){
     const t=floatingTexts[i];t.y+=t.vy;t.life-=0.02;
     if(t.life<=0){floatingTexts.splice(i,1);continue;}
     ctx.font='bold '+t.size+'px Arial';ctx.textAlign='center';ctx.fillStyle=t.color;ctx.globalAlpha=t.life;
     ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y);ctx.globalAlpha=1;
   }
+
+  // Draw player dancer (bottom center)
+  if (player.dancing && player.dance) {
+    player.danceFrame++;
+    const px = canvas.width / 2;
+    const py = canvas.height - 80;
+    // Glowing platform
+    const grad = ctx.createRadialGradient(px, py+10, 10, px, py+10, 80);
+    grad.addColorStop(0, player.dance.color + 'aa');
+    grad.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.ellipse(px, py+12, 75, 22, 0, 0, Math.PI*2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    // Label above dancer
+    ctx.font = 'bold 15px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = player.dance.color;
+    ctx.globalAlpha = 0.9;
+    ctx.fillText('YOU', px, py - 90);
+    ctx.globalAlpha = 1;
+    drawStickFigure(px, py, player.danceFrame, player.dance.move, player.dance.color);
+    if (player.danceFrame >= player.danceDuration) {
+      player.dancing = false;
+      player.dance = null;
+    }
+  }
+
   updateBubbles();
   requestAnimationFrame(gameLoop);
 }
-for(let i=0;i<5;i++)setTimeout(spawnHead,i*300);
+
+for(let i=0;i<5;i++) setTimeout(spawnHead, i*300);
 gameLoop();
 </script>
 </body>
