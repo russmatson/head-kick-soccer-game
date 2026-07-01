@@ -6,49 +6,17 @@
 <title>HEAD KICKER 3000</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #1a1a2e;
-    font-family: 'Arial Black', sans-serif;
-    overflow: hidden;
-    cursor: crosshair;
-    user-select: none;
-  }
+  body { background: #1a1a2e; font-family: 'Arial Black', sans-serif; overflow: hidden; cursor: crosshair; user-select: none; }
   #gameCanvas { display: block; }
-  #ui {
-    position: fixed; top: 10px; left: 10px; color: #fff;
-    font-size: 22px; text-shadow: 2px 2px 0 #000;
-    pointer-events: none;
-  }
+  #ui { position: fixed; top: 10px; left: 10px; color: #fff; font-size: 22px; text-shadow: 2px 2px 0 #000; pointer-events: none; }
   #score-display { color: #ffd700; font-size: 28px; }
-  #oneliner {
-    position: fixed; bottom: 20px; left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.85);
-    color: #00ffcc; font-size: 20px; padding: 12px 24px;
-    border-radius: 10px; border: 2px solid #00ffcc;
-    text-align: center; max-width: 90vw;
-    display: none; pointer-events: none;
-    font-style: italic;
-  }
-  #dance-label {
-    position: fixed; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 48px; color: #ff69b4;
-    text-shadow: 3px 3px 0 #000, -1px -1px 0 #000;
-    display: none; pointer-events: none;
-    text-align: center;
-  }
-  #instructions {
-    position: fixed; top: 10px; right: 10px;
-    color: #aaa; font-size: 14px; text-align: right;
-    pointer-events: none;
-  }
-  #combo {
-    position: fixed; top: 80px; left: 10px;
-    color: #ff4500; font-size: 36px;
-    text-shadow: 2px 2px 0 #000;
-    display: none; pointer-events: none;
-  }
+  #oneliner { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #00ffcc; font-size: 20px; padding: 12px 24px; border-radius: 10px; border: 2px solid #00ffcc; text-align: center; max-width: 90vw; display: none; pointer-events: none; font-style: italic; }
+  #dance-label { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; color: #ff69b4; text-shadow: 3px 3px 0 #000; display: none; pointer-events: none; text-align: center; }
+  #instructions { position: fixed; top: 10px; right: 10px; color: #aaa; font-size: 14px; text-align: right; pointer-events: none; }
+  #combo { position: fixed; top: 80px; left: 10px; color: #ff4500; font-size: 36px; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
+  .speech-bubble { position: fixed; background: #fff; color: #111; font-size: 13px; font-family: Arial, sans-serif; font-weight: bold; padding: 10px 14px; border-radius: 14px; border: 3px solid #c0392b; max-width: 200px; text-align: center; pointer-events: none; z-index: 999; box-shadow: 3px 3px 0 rgba(0,0,0,0.3); line-height: 1.4; transition: opacity 0.4s; }
+  .speech-bubble::after { content: ''; position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: #c0392b; }
+  .speech-bubble::before { content: ''; position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: #fff; z-index: 1; }
 </style>
 </head>
 <body>
@@ -69,7 +37,28 @@ canvas.height = window.innerHeight;
 window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 let score = 0, kickCount = 0, comboCount = 0, comboTimer = null;
 let heads = [], particles = [], floatingTexts = [], isDancing = false;
+const activeBubbles = [];
 const FACE_EMOJIS = ['😀','😂','😎','🤓','😤','😡','🥴','🤪','😱','🤯','👀','😈','🤡','👹','💀'];
+const RENT_CONTROL_QUOTES = [
+  "Rent control keeps families in their homes!",
+  "Housing is a human RIGHT, not a commodity!",
+  "No one should be priced out of their neighborhood!",
+  "Corporate landlords are stealing our future!",
+  "Rent stabilization = community stability!",
+  "My head hurts... but rising rents hurt MORE!",
+  "Cap rents NOW before I lose my OTHER head!",
+  "Gentrification displaces real communities!",
+  "Affordable housing saves lives... unlike this game!",
+  "Even headless, I demand rent stabilization!",
+  "Vacancy decontrol is a SCAM!",
+  "Tenant protections ARE worker protections!",
+  "The rent is too damn high! (So was that kick.)",
+  "Long-term tenants deserve long-term security!",
+  "Housing speculation destroys neighborhoods!",
+  "Just cause eviction laws protect families!",
+  "Pass the Tenant Protection Act... OW!",
+  "Landlords don't build communities — TENANTS do!",
+];
 const DECADEDANCES = [
   { decade: '1950s', name: 'THE TWIST!', emoji: '🕺', color: '#ff6b35' },
   { decade: '1960s', name: 'THE MASHED POTATO!', emoji: '💃', color: '#f7931e' },
@@ -81,22 +70,27 @@ const DECADEDANCES = [
   { decade: '2020s', name: 'THE GRIDDY!', emoji: '🏈', color: '#00ffcc' },
 ];
 const ONE_LINERS = [
-  "Head above water? Not anymore!",
-  "I told you to use your head... not LOSE it!",
-  "That's what I call a HEADER!",
-  "You've been de-capitated from the competition!",
-  "Heads will roll... and SCORE!",
-  "I ain't lost my head over this... YOU did!",
-  "GOOOOOAL! Also, OUCH!",
-  "That's gotta hurt... but it's worth 3 points!",
-  "Keep your head in the game? Too late!",
-  "Some people lose their heads when they panic... smart!",
-  "Don't worry, it'll grow back. Probably.",
-  "That's called a hat trick... minus the hat... and the head.",
-  "YOU SHALL NOT PASS... but your head just did!",
-  "Nothing but net... and skull.",
-  "I'd say sorry, but that would be lying.",
+  "Head above water? Not anymore!","I told you to use your head... not LOSE it!","That's what I call a HEADER!","You've been de-capitated!","Heads will roll... and SCORE!","GOOOOOAL! Also, OUCH!","Keep your head in the game? Too late!","Don't worry, it'll grow back. Probably.","Nothing but net... and skull.","I'd say sorry, but that would be lying.",
 ];
+function showSpeechBubble(head, text) {
+  const el = document.createElement('div');
+  el.className = 'speech-bubble';
+  el.textContent = text;
+  document.body.appendChild(el);
+  activeBubbles.push({ el, head, createdAt: Date.now(), duration: 4500 });
+}
+function updateBubbles() {
+  const now = Date.now();
+  for (let i = activeBubbles.length - 1; i >= 0; i--) {
+    const b = activeBubbles[i];
+    const age = now - b.createdAt;
+    if (age > b.duration) { b.el.remove(); activeBubbles.splice(i, 1); continue; }
+    if (age > b.duration - 600) b.el.style.opacity = ((b.duration - age) / 600).toFixed(2);
+    const hw = b.el.offsetWidth || 200, hh = b.el.offsetHeight || 60;
+    b.el.style.left = (b.head.x - hw / 2) + 'px';
+    b.el.style.top = (b.head.y - b.head.size - hh - 14) + 'px';
+  }
+}
 function spawnHead() {
   const size = 50 + Math.random() * 40;
   const emoji = FACE_EMOJIS[Math.floor(Math.random() * FACE_EMOJIS.length)];
@@ -110,25 +104,21 @@ function spawnHead() {
   const targetY = canvas.height * 0.3 + Math.random() * canvas.height * 0.4;
   const dx = (targetX - x) / (100 + Math.random() * 100);
   const dy = (targetY - y) / (100 + Math.random() * 100);
-  heads.push({ x, y, size, dx, dy, emoji, rotation: 0, rotSpeed: (Math.random()-0.5)*0.1, bounces: 0 });
+  heads.push({ x, y, size, dx, dy, emoji, rotation: 0, rotSpeed: (Math.random()-0.5)*0.1, bounces: 0, kicked: false });
 }
 function spawnParticles(x, y, color) {
   for (let i = 0; i < 20; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 3 + Math.random() * 8;
-    particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1, decay: 0.03+Math.random()*0.04, size: 4+Math.random()*8, color: color || 'hsl('+(Math.random()*360)+',100%,60%)' });
+    const angle = Math.random() * Math.PI * 2, speed = 3 + Math.random() * 8;
+    particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1, decay: 0.03+Math.random()*0.04, size: 4+Math.random()*8, color: color||('hsl('+(Math.random()*360)+',100%,60%)') });
   }
 }
-function addFloatingText(x, y, text, color) {
-  floatingTexts.push({ x, y, text, color: color||'#fff', life: 1, vy: -2, size: 24 });
-}
+function addFloatingText(x, y, text, color) { floatingTexts.push({ x, y, text, color: color||'#fff', life: 1, vy: -2, size: 24 }); }
 function kickHead(head, mx, my) {
-  const dx = head.x - mx, dy = head.y - my;
-  const dist = Math.sqrt(dx*dx + dy*dy);
+  const dx = head.x - mx, dy = head.y - my, dist = Math.sqrt(dx*dx+dy*dy)||1;
   const force = 15 + Math.random() * 10;
   head.dx = (dx/dist)*force; head.dy = (dy/dist)*force;
   head.rotSpeed = (Math.random()-0.5)*0.4;
-  head.kicked = true; head.kickTimer = 120;
+  head.kicked = true; head.kickTimer = 200;
   kickCount++; comboCount++;
   clearTimeout(comboTimer);
   comboTimer = setTimeout(() => { comboCount = 0; updateCombo(); }, 1500);
@@ -139,19 +129,17 @@ function kickHead(head, mx, my) {
   updateCombo();
   spawnParticles(head.x, head.y);
   addFloatingText(head.x, head.y - head.size, comboCount > 1 ? 'x'+comboCount+' +'+pts : '+'+pts, comboCount > 2 ? '#ffd700' : '#fff');
-  if (kickCount % 5 === 0) triggerDanceParty();
-  else showOneLiner();
+  showSpeechBubble(head, RENT_CONTROL_QUOTES[Math.floor(Math.random()*RENT_CONTROL_QUOTES.length)]);
+  if (kickCount % 5 === 0) triggerDanceParty(); else showOneLiner();
 }
 function updateCombo() {
   const el = document.getElementById('combo');
-  if (comboCount > 1) { el.style.display='block'; el.textContent='COMBO x'+comboCount+'!'; }
-  else el.style.display='none';
+  if (comboCount > 1) { el.style.display='block'; el.textContent='COMBO x'+comboCount+'!'; } else el.style.display='none';
 }
 function showOneLiner() {
   const el = document.getElementById('oneliner');
   el.textContent = '"' + ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)] + '"';
-  el.style.display='block';
-  clearTimeout(window._oneTimeout);
+  el.style.display='block'; clearTimeout(window._oneTimeout);
   window._oneTimeout = setTimeout(() => { el.style.display='none'; }, 3000);
 }
 function triggerDanceParty() {
@@ -161,73 +149,62 @@ function triggerDanceParty() {
   el.innerHTML = dance.emoji+' '+dance.decade+' '+dance.emoji+'<br><span style="color:'+dance.color+'">'+dance.name+'</span>';
   el.style.display='block';
   heads.forEach(h => { h.dancing=true; h.danceAngle=Math.random()*Math.PI*2; h.danceSpeed=0.05+Math.random()*0.05; });
-  for (let i=0; i<5; i++) setTimeout(() => spawnParticles(Math.random()*canvas.width, Math.random()*canvas.height, 'hsl('+(Math.random()*360)+',100%,60%)'), i*200);
+  for (let i=0;i<5;i++) setTimeout(()=>spawnParticles(Math.random()*canvas.width,Math.random()*canvas.height,'hsl('+(Math.random()*360)+',100%,60%)'),i*200);
   const liner = document.getElementById('oneliner');
-  liner.textContent = '"' + ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)] + '"';
-  liner.style.display='block';
-  setTimeout(() => {
-    el.style.display='none';
-    heads.forEach(h => { h.dancing=false; });
-    isDancing = false;
-    clearTimeout(window._oneTimeout);
-    window._oneTimeout = setTimeout(() => { liner.style.display='none'; }, 2000);
-  }, 3000);
+  liner.textContent = '"'+ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)]+'"'; liner.style.display='block';
+  setTimeout(() => { el.style.display='none'; heads.forEach(h=>{h.dancing=false;}); isDancing=false; clearTimeout(window._oneTimeout); window._oneTimeout=setTimeout(()=>{liner.style.display='none';},2000); }, 3000);
 }
 canvas.addEventListener('click', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const rect = canvas.getBoundingClientRect(), mx = e.clientX-rect.left, my = e.clientY-rect.top;
   let hit = false;
-  for (let i = heads.length-1; i >= 0; i--) {
-    const h = heads[i];
-    if (Math.sqrt((h.x-mx)**2+(h.y-my)**2) < h.size) { kickHead(h, mx, my); hit=true; break; }
-  }
-  if (!hit) { spawnParticles(mx, my, '#ff0000'); addFloatingText(mx, my, 'MISS!', '#ff4444'); comboCount=0; updateCombo(); }
+  for (let i=heads.length-1;i>=0;i--) { const h=heads[i]; if(Math.sqrt((h.x-mx)**2+(h.y-my)**2)<h.size){kickHead(h,mx,my);hit=true;break;} }
+  if (!hit) { spawnParticles(mx,my,'#ff0000'); addFloatingText(mx,my,'MISS!','#ff4444'); comboCount=0; updateCombo(); }
 });
 function drawHead(h) {
-  ctx.save(); ctx.translate(h.x, h.y); ctx.rotate(h.rotation);
-  ctx.beginPath(); ctx.arc(4, 4, h.size, 0, Math.PI*2); ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(0, 0, h.size, 0, Math.PI*2);
-  ctx.fillStyle = h.kicked ? '#ffcc99' : '#ffd1a0'; ctx.fill();
-  ctx.strokeStyle='#8B4513'; ctx.lineWidth=3; ctx.stroke();
-  ctx.font = (h.size*1.1)+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(h.emoji, 0, 2); ctx.restore();
+  ctx.save(); ctx.translate(h.x,h.y); ctx.rotate(h.rotation);
+  ctx.beginPath(); ctx.arc(4,4,h.size,0,Math.PI*2); ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,0,h.size,0,Math.PI*2);
+  ctx.fillStyle=h.kicked?'#ffcc99':'#ffd1a0'; ctx.fill();
+  ctx.strokeStyle=h.kicked?'#c0392b':'#8B4513'; ctx.lineWidth=h.kicked?4:3; ctx.stroke();
+  ctx.font=(h.size*1.1)+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(h.kicked?'🗣️':h.emoji,0,2); ctx.restore();
 }
-let spawnTimer = 0;
+let spawnTimer=0;
 function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.strokeStyle='rgba(255,255,255,0.03)'; ctx.lineWidth=1;
-  for (let x=0; x<canvas.width; x+=60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
-  for (let y=0; y<canvas.height; y+=60) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+  for(let x=0;x<canvas.width;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+  for(let y=0;y<canvas.height;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
   spawnTimer++;
-  if (spawnTimer > 90 && heads.length < 12) { spawnHead(); spawnTimer = 0; }
-  for (let i=heads.length-1; i>=0; i--) {
-    const h = heads[i];
-    if (h.dancing) { h.danceAngle+=h.danceSpeed; h.x+=Math.cos(h.danceAngle)*3; h.y+=Math.sin(h.danceAngle*1.3)*3; }
-    else { h.x+=h.dx; h.y+=h.dy; h.dx*=0.99; h.dy*=0.99; }
+  if(spawnTimer>90&&heads.length<12){spawnHead();spawnTimer=0;}
+  for(let i=heads.length-1;i>=0;i--){
+    const h=heads[i];
+    if(h.dancing){h.danceAngle+=h.danceSpeed;h.x+=Math.cos(h.danceAngle)*3;h.y+=Math.sin(h.danceAngle*1.3)*3;}
+    else{h.x+=h.dx;h.y+=h.dy;h.dx*=0.99;h.dy*=0.99;}
     h.rotation+=h.rotSpeed;
-    if (h.x-h.size<0) { h.x=h.size; h.dx=Math.abs(h.dx); h.bounces=(h.bounces||0)+1; }
-    if (h.x+h.size>canvas.width) { h.x=canvas.width-h.size; h.dx=-Math.abs(h.dx); h.bounces=(h.bounces||0)+1; }
-    if (h.y-h.size<0) { h.y=h.size; h.dy=Math.abs(h.dy); h.bounces=(h.bounces||0)+1; }
-    if (h.y+h.size>canvas.height) { h.y=canvas.height-h.size; h.dy=-Math.abs(h.dy); h.bounces=(h.bounces||0)+1; }
-    if (h.kickTimer>0) h.kickTimer--;
+    if(h.x-h.size<0){h.x=h.size;h.dx=Math.abs(h.dx);}
+    if(h.x+h.size>canvas.width){h.x=canvas.width-h.size;h.dx=-Math.abs(h.dx);}
+    if(h.y-h.size<0){h.y=h.size;h.dy=Math.abs(h.dy);}
+    if(h.y+h.size>canvas.height){h.y=canvas.height-h.size;h.dy=-Math.abs(h.dy);}
+    if(h.kickTimer>0)h.kickTimer--;
     drawHead(h);
-    if (!h.kicked && !h.dancing && (h.x<-200||h.x>canvas.width+200||h.y<-200||h.y>canvas.height+200)) heads.splice(i,1);
+    if(!h.kicked&&!h.dancing&&(h.x<-200||h.x>canvas.width+200||h.y<-200||h.y>canvas.height+200))heads.splice(i,1);
   }
-  for (let i=particles.length-1; i>=0; i--) {
-    const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.2; p.life-=p.decay;
-    if (p.life<=0) { particles.splice(i,1); continue; }
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.size*p.life, 0, Math.PI*2);
-    ctx.fillStyle=p.color; ctx.globalAlpha=p.life; ctx.fill(); ctx.globalAlpha=1;
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.2;p.life-=p.decay;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.life;ctx.fill();ctx.globalAlpha=1;
   }
-  for (let i=floatingTexts.length-1; i>=0; i--) {
-    const t=floatingTexts[i]; t.y+=t.vy; t.life-=0.02;
-    if (t.life<=0) { floatingTexts.splice(i,1); continue; }
-    ctx.font='bold '+t.size+'px Arial'; ctx.textAlign='center'; ctx.fillStyle=t.color; ctx.globalAlpha=t.life;
-    ctx.strokeStyle='#000'; ctx.lineWidth=3; ctx.strokeText(t.text,t.x,t.y); ctx.fillText(t.text,t.x,t.y); ctx.globalAlpha=1;
+  for(let i=floatingTexts.length-1;i>=0;i--){
+    const t=floatingTexts[i];t.y+=t.vy;t.life-=0.02;
+    if(t.life<=0){floatingTexts.splice(i,1);continue;}
+    ctx.font='bold '+t.size+'px Arial';ctx.textAlign='center';ctx.fillStyle=t.color;ctx.globalAlpha=t.life;
+    ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y);ctx.globalAlpha=1;
   }
+  updateBubbles();
   requestAnimationFrame(gameLoop);
 }
-for (let i=0; i<5; i++) setTimeout(spawnHead, i*300);
+for(let i=0;i<5;i++)setTimeout(spawnHead,i*300);
 gameLoop();
 </script>
 </body>
