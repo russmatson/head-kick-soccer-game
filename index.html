@@ -5,42 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HEAD KICKER 3000</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #1a1a2e; font-family: Arial Black, sans-serif; overflow: hidden; cursor: crosshair; user-select: none; }
-  #gameCanvas { display: block; }
-  #ui { position: fixed; top: 10px; left: 10px; color: #fff; font-size: 22px; text-shadow: 2px 2px 0 #000; pointer-events: none; }
-  #score-display { color: #ffd700; font-size: 28px; }
-  #oneliner { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #00ffcc; font-size: 18px; padding: 12px 24px; border-radius: 10px; border: 2px solid #00ffcc; text-align: center; max-width: 80vw; display: none; pointer-events: none; font-style: italic; }
-  #dance-label { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); font-size: 42px; color: #ff69b4; text-shadow: 3px 3px 0 #000; display: none; pointer-events: none; text-align: center; white-space: nowrap; }
-  #instructions { position: fixed; top: 10px; right: 10px; color: #aaa; font-size: 14px; text-align: right; pointer-events: none; }
-  #combo { position: fixed; top: 80px; left: 10px; color: #ff4500; font-size: 36px; text-shadow: 2px 2px 0 #000; display: none; pointer-events: none; }
-  #anti-rent-banner { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(180,0,0,0.92); color: #fff; font-size: 17px; padding: 13px 28px; border-radius: 10px; border: 2px solid #ff4444; text-align: center; max-width: 78vw; display: none; pointer-events: none; font-weight: bold; }
-  .speech-bubble { position: fixed; background: #fff; color: #111; font-size: 13px; font-family: Arial, sans-serif; font-weight: bold; padding: 10px 14px; border-radius: 14px; border: 3px solid #c0392b; max-width: 200px; text-align: center; pointer-events: none; z-index: 999; box-shadow: 3px 3px 0 rgba(0,0,0,0.3); line-height: 1.4; transition: opacity 0.4s; }
-  .speech-bubble::after { content: ""; position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: #c0392b; }
-  .speech-bubble::before { content: ""; position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: #fff; z-index: 1; }
-  #finish-btn { position: fixed; bottom: 18px; right: 18px; background: #ffd700; color: #111; border: none; font-size: 16px; font-weight: bold; padding: 11px 22px; border-radius: 8px; cursor: pointer; z-index: 100; box-shadow: 2px 2px 0 #000; }
-  #finish-btn:hover { background: #ffe44d; }
-  /* ---- QUIZ SCREEN ---- */
-  #quiz-screen { display: none; position: fixed; inset: 0; background: #0d0d1a; z-index: 200; overflow-y: auto; padding: 30px 20px 40px; cursor: default; }
-  #quiz-screen h1 { text-align: center; color: #ffd700; font-size: 28px; margin-bottom: 4px; text-shadow: 2px 2px 0 #000; }
-  #quiz-screen .quiz-subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 24px; }
-  .q-block { background: #1a1a35; border: 2px solid #333; border-radius: 12px; padding: 20px 22px; margin-bottom: 18px; max-width: 720px; margin-left: auto; margin-right: auto; }
-  .q-block .source-tag { font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
-  .source-abundance { color: #00bfff; }
-  .source-heritage { color: #ff6b35; }
-  .q-block .q-text { color: #fff; font-size: 16px; margin-bottom: 14px; line-height: 1.5; font-family: Arial, sans-serif; font-weight: bold; }
-  .q-option { display: block; width: 100%; text-align: left; background: #11112a; color: #ddd; border: 2px solid #333; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 14px; font-family: Arial, sans-serif; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-  .q-option:hover:not(:disabled) { background: #1e1e45; border-color: #555; }
-  .q-option.correct { background: #0a3a1a !important; border-color: #00cc44 !important; color: #00ff66 !important; }
-  .q-option.wrong { background: #3a0a0a !important; border-color: #cc2200 !important; color: #ff6644 !important; }
-  .q-option:disabled { cursor: default; }
-  .q-explain { font-size: 13px; color: #aaa; font-family: Arial, sans-serif; line-height: 1.5; margin-top: 10px; padding: 10px 12px; background: #0d0d22; border-radius: 6px; border-left: 3px solid #555; display: none; }
-  #quiz-score-bar { max-width: 720px; margin: 0 auto 20px; text-align: center; color: #ffd700; font-size: 18px; font-weight: bold; display: none; }
-  #quiz-result { max-width: 720px; margin: 0 auto 30px; padding: 24px; background: #1a1a35; border-radius: 14px; border: 2px solid #ffd700; text-align: center; display: none; }
-  #quiz-result h2 { color: #ffd700; font-size: 26px; margin-bottom: 10px; }
-  #quiz-result p { color: #ddd; font-size: 15px; font-family: Arial, sans-serif; line-height: 1.6; }
-  #play-again-btn { margin-top: 18px; background: #ffd700; color: #111; border: none; font-size: 16px; font-weight: bold; padding: 12px 28px; border-radius: 8px; cursor: pointer; box-shadow: 2px 2px 0 #000; }
-  #play-again-btn:hover { background: #ffe44d; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1a1a2e; font-family:Arial Black,sans-serif; overflow:hidden; cursor:crosshair; user-select:none; }
+#gameCanvas { display:block; }
+#ui { position:fixed; top:10px; left:10px; color:#fff; font-size:22px; text-shadow:2px 2px 0 #000; pointer-events:none; }
+#score-display { color:#ffd700; font-size:28px; }
+#oneliner { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); color:#00ffcc; font-size:18px; padding:12px 24px; border-radius:10px; border:2px solid #00ffcc; text-align:center; max-width:80vw; display:none; pointer-events:none; font-style:italic; }
+#dance-label { position:fixed; top:18%; left:50%; transform:translateX(-50%); font-size:42px; color:#ff69b4; text-shadow:3px 3px 0 #000; display:none; pointer-events:none; text-align:center; white-space:nowrap; }
+#instructions { position:fixed; top:10px; right:10px; color:#aaa; font-size:13px; text-align:right; pointer-events:none; }
+#combo { position:fixed; top:80px; left:10px; color:#ff4500; font-size:36px; text-shadow:2px 2px 0 #000; display:none; pointer-events:none; }
+#anti-rent-banner { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(160,0,0,0.92); color:#fff; font-size:16px; padding:13px 28px; border-radius:10px; border:2px solid #ff4444; text-align:center; max-width:78vw; display:none; pointer-events:none; font-weight:bold; }
+.speech-bubble { position:fixed; background:#fff; color:#111; font-size:13px; font-family:Arial,sans-serif; font-weight:bold; padding:10px 14px; border-radius:14px; border:3px solid #c0392b; max-width:200px; text-align:center; pointer-events:none; z-index:999; box-shadow:3px 3px 0 rgba(0,0,0,0.3); line-height:1.4; transition:opacity 0.4s; }
+.speech-bubble::after { content:""; position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); border:8px solid transparent; border-top-color:#c0392b; }
+.speech-bubble::before { content:""; position:absolute; bottom:-11px; left:50%; transform:translateX(-50%); border:7px solid transparent; border-top-color:#fff; z-index:1; }
+#finish-btn { position:fixed; bottom:18px; right:18px; background:#ffd700; color:#111; border:none; font-size:16px; font-weight:bold; padding:11px 22px; border-radius:8px; cursor:pointer; z-index:100; box-shadow:2px 2px 0 #000; display:none; }
+#finish-btn:hover { background:#ffe44d; }
+#quiz-screen { display:none; position:fixed; inset:0; background:#0d0d1a; z-index:200; overflow-y:auto; padding:30px 20px 60px; cursor:default; }
+#quiz-screen h1 { text-align:center; color:#ffd700; font-size:28px; margin-bottom:4px; text-shadow:2px 2px 0 #000; }
+.quiz-subtitle { text-align:center; color:#aaa; font-size:14px; margin-bottom:24px; }
+.q-block { background:#1a1a35; border:2px solid #333; border-radius:12px; padding:20px 22px; margin-bottom:18px; max-width:720px; margin-left:auto; margin-right:auto; }
+.source-tag { font-size:11px; font-weight:bold; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.source-abundance { color:#00bfff; }
+.source-heritage { color:#ff6b35; }
+.q-text { color:#fff; font-size:16px; margin-bottom:14px; line-height:1.5; font-family:Arial,sans-serif; font-weight:bold; }
+.q-option { display:block; width:100%; text-align:left; background:#11112a; color:#ddd; border:2px solid #333; border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:14px; font-family:Arial,sans-serif; cursor:pointer; }
+.q-option:hover:not(:disabled) { background:#1e1e45; border-color:#555; }
+.q-option.correct { background:#0a3a1a !important; border-color:#00cc44 !important; color:#00ff66 !important; }
+.q-option.wrong { background:#3a0a0a !important; border-color:#cc2200 !important; color:#ff6644 !important; }
+.q-option:disabled { cursor:default; }
+.q-explain { font-size:13px; color:#bbb; font-family:Arial,sans-serif; line-height:1.5; margin-top:10px; padding:10px 12px; background:#0d0d22; border-radius:6px; border-left:3px solid #555; display:none; }
+#quiz-result { max-width:720px; margin:0 auto 30px; padding:24px; background:#1a1a35; border-radius:14px; border:2px solid #ffd700; text-align:center; display:none; }
+#quiz-result h2 { color:#ffd700; font-size:24px; margin-bottom:10px; }
+#quiz-result p { color:#ddd; font-size:15px; font-family:Arial,sans-serif; line-height:1.6; }
+#play-again-btn { margin-top:18px; background:#ffd700; color:#111; border:none; font-size:16px; font-weight:bold; padding:12px 28px; border-radius:8px; cursor:pointer; }
+#play-again-btn:hover { background:#ffe44d; }
 </style>
 </head>
 <body>
@@ -53,12 +51,11 @@
 <div id="oneliner"></div>
 <div id="dance-label"></div>
 <div id="anti-rent-banner"></div>
-<div id="instructions">CLICK heads to KICK them!<br>Every 5 kicks = DANCE PARTY!<br><span style="color:#ffd700">Kick 20 heads to unlock the QUIZ!</span></div>
-<button id="finish-btn" onclick="showQuiz()" style="display:none">TAKE THE QUIZ! 📚</button>
+<div id="instructions">CLICK heads to KICK them!<br>Every 5 kicks = DANCE PARTY!<br><span style="color:#ffd700">Kick 20 heads to unlock QUIZ!</span></div>
+<button id="finish-btn" onclick="showQuiz()">TAKE THE QUIZ! 📚</button>
 <div id="quiz-screen">
   <h1>📚 RENT CONTROL QUIZ 📚</h1>
-  <div class="quiz-subtitle">Questions from the perspectives of Abundance Liberals & The Heritage Foundation</div>
-  <div id="quiz-score-bar"></div>
+  <div class="quiz-subtitle">From the perspectives of Abundance Liberals &amp; The Heritage Foundation</div>
   <div id="quiz-questions"></div>
   <div id="quiz-result">
     <h2 id="result-title"></h2>
@@ -67,305 +64,47 @@
   </div>
 </div>
 <script>
-<script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-window.addEventListener("resize", () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
-
-let score = 0, kickCount = 0, comboCount = 0, comboTimer = null;
-let heads = [], particles = [], floatingTexts = [], isDancing = false;
-const activeBubbles = [];
-let gameRunning = true;
-
-const FACE_EMOJIS = ["😀","😂","😎","🤓","😤","😡","🥴","🤪","😱","🤯","👀","😈","🤡","👹","💀"];
-
-const RENT_CONTROL_QUOTES = [
-  "Rent control keeps families in their homes!",
-  "Housing is a human RIGHT, not a commodity!",
-  "No one should be priced out of their neighborhood!",
-  "Corporate landlords are stealing our future!",
-  "Rent stabilization = community stability!",
-  "My head hurts... but rising rents hurt MORE!",
-  "Cap rents NOW before I lose my OTHER head!",
-  "Gentrification displaces real communities!",
-  "Affordable housing saves lives... unlike this game!",
-  "Even headless, I demand rent stabilization!",
-  "Vacancy decontrol is a SCAM!",
-  "Tenant protections ARE worker protections!",
-  "The rent is too damn high! (So was that kick.)",
-  "Long-term tenants deserve long-term security!",
-  "Just cause eviction laws protect families!",
+var canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+window.addEventListener("resize",function(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+var score=0,kickCount=0,comboCount=0,comboTimer=null,heads=[],particles=[],floatingTexts=[],isDancing=false,activeBubbles=[],gameRunning=true;
+var FACE_EMOJIS=["😀","😂","😎","🤓","😤","😡","🥴","🤪","😱","🤯","👀","😈","🤡","👹","💀"];
+var RENT_QUOTES=["Rent control keeps families in their homes!","Housing is a human RIGHT!","No one should be priced out!","Corporate landlords are stealing our future!","Cap rents NOW before I lose my OTHER head!","Rent stabilization = community stability!","Even headless I demand rent stabilization!","Gentrification displaces real communities!","Tenant protections ARE worker protections!","The rent is too damn high! So was that kick.","Just cause eviction laws protect families!","Affordable housing saves lives!","Vacancy decontrol is a SCAM!","Housing speculation destroys neighborhoods!","Long-term tenants deserve long-term security!"];
+var ANTI_QUOTES=["Rent control: making housing scarce since forever. Supply and demand still exists!","97% of economists oppose rent control. But sure, the heads know better.","Sweden tried rent control. Result: 20-year waitlists. Nice work!","Rent control reduces rental supply by 15% per Stanford study. But feelings!","San Francisco has had rent control since 1979. Still the least affordable city. Curious!","Want more housing? Build more housing. Want less? Rent control!","Freezing prices does not freeze costs. Landlords just stop maintaining buildings!","Rent control creates housing black markets. Congratulations, you played yourself.","Nothing says affordable city like rent control driving away new construction!","Rent control: where winners are current tenants and losers are everyone else."];
+var DANCES=[{decade:"1950s",name:"THE TWIST!",emoji:"🕺",color:"#ff6b35",move:"twist"},{decade:"1960s",name:"THE MASHED POTATO!",emoji:"💃",color:"#f7931e",move:"mash"},{decade:"1970s",name:"DISCO FEVER!",emoji:"🪩",color:"#ffd700",move:"disco"},{decade:"1980s",name:"THE RUNNING MAN!",emoji:"🏃",color:"#00ff41",move:"run"},{decade:"1990s",name:"THE MACARENA!",emoji:"🙌",color:"#00bfff",move:"macarena"},{decade:"2000s",name:"THE SOULJA BOY!",emoji:"✈️",color:"#9b59b6",move:"soulja"},{decade:"2010s",name:"THE FLOSS!",emoji:"🦷",color:"#ff1493",move:"floss"},{decade:"2020s",name:"THE GRIDDY!",emoji:"🏈",color:"#00ffcc",move:"griddy"}];
+var ONE_LINERS=["Head above water? Not anymore!","I told you to use your head... not LOSE it!","GOOOOOAL! Also, OUCH!","Keep your head in the game? Too late!","Nothing but net... and skull.","I'd say sorry, but that would be lying.","That's what I call a HEADER!"];
+var QS=[
+{src:"abundance",lbl:"🏗️ Abundance Liberal",q:"A city faces a housing crisis. From an abundance liberal perspective, what is the most effective long-term solution?",opts:["Expand rent control to cover all units built after 1990","Upzone neighborhoods, streamline permitting, and build far more housing supply","Impose vacancy taxes and ban short-term rentals only","Freeze all new construction until rents stabilize"],ans:1,exp:"Abundance liberals (Jerusalem Demsas, Ezra Klein) argue housing scarcity is the root cause. The answer is dramatically increasing supply through zoning reform — not price controls that reduce the incentive to build."},
+{src:"heritage",lbl:"🦅 Heritage Foundation",q:"According to Heritage Foundation economists, what does rent control primarily accomplish?",opts:["It ensures low-income families can afford rent in perpetuity","It reduces housing supply and quality while creating insider-outsider inequities","It stabilizes neighborhoods without affecting new construction","It is an effective short-term tool with no long-term downsides"],ans:1,exp:"Heritage scholars argue rent control is a textbook price ceiling: it reduces supply as landlords convert units to condos or let them deteriorate, benefiting current tenants at the expense of future renters who can't find housing at all."},
+{src:"abundance",lbl:"🏗️ Abundance Liberal",q:"A Stanford study by Diamond et al. (2019) found that San Francisco rent control caused landlords to reduce rental housing supply by roughly how much?",opts:["About 2%","About 7%","About 15%","About 30%"],ans:2,exp:"The Diamond et al. Stanford study found rent control reduced rental supply by roughly 15% as landlords converted apartments to condos or redeveloped properties. It protected existing tenants but worsened the overall affordability crisis."},
+{src:"heritage",lbl:"🦅 Heritage Foundation",q:"From a Heritage Foundation free-market perspective, what government policy would best improve housing affordability?",opts:["Federal rent control legislation applying to all cities","Eliminate exclusionary zoning, reduce regulations, and let markets build","A national rent subsidy funded by a landlord windfall tax","Government construction of public housing in all major metros"],ans:1,exp:"Heritage argues that government-created barriers — single-family zoning, building codes, parking minimums, lengthy environmental review — made housing expensive. Deregulating land use lets the private market build more housing and drive down costs."},
+{src:"abundance",lbl:"🏗️ Abundance Liberal",q:"Abundance liberals cite Vienna, Austria as a housing model. What does Vienna do that they support?",opts:["Strict citywide rent control on all private units","Ban on private landlords — all rental must be publicly owned","Massive public and social housing construction alongside a permissive private market","Lottery-based housing assignment regardless of income"],ans:2,exp:"Vienna builds enormous amounts of social housing (nearly 60% of residents live in subsidized or city-owned units) while also allowing a functioning private market. The key is supply — public OR private — not price controls on existing units."},
+{src:"heritage",lbl:"🦅 Heritage Foundation",q:"Heritage Foundation research on NYC rent stabilization found it disproportionately benefits which group?",opts:["Recent low-income immigrants entering the rental market","Long-term tenants — many of whom are wealthier than market-rate renters","Young renters trying to find their first apartment","Residents of high-poverty neighborhoods"],ans:1,exp:"Rent-stabilized apartments in NYC are often occupied by long-term residents whose incomes have grown substantially — including households earning over $100K. Meanwhile low-income newcomers face a nearly impossible rental market with few vacancies."},
+{src:"abundance",lbl:"🏗️ Abundance Liberal",q:"Minneapolis abolished single-family-only zoning in its 2040 Plan, allowing duplexes and triplexes citywide. What happened to rents compared to peer cities?",opts:["Rents rose faster than peers due to gentrification pressure","Rents stayed exactly the same — zoning had no effect","Rents fell significantly relative to peer cities as more units were built","Rents fell only in wealthy neighborhoods"],ans:2,exp:"Studies found Minneapolis rents grew much slower (or fell) relative to comparable Midwestern cities after zoning reform spurred new construction. More supply = more affordability. No rent control required."},
+{src:"heritage",lbl:"🦅 Heritage Foundation",q:"Economists across the political spectrum — MIT, Princeton, Stanford — largely agree on rent control. What is their consensus?",opts:["Rent control is effective when applied carefully to specific market segments","Rent control benefits tenants but harms landlords in a zero-sum way","Rent control reduces housing supply and quality, harming long-run affordability","The evidence is too mixed to draw firm conclusions"],ans:2,exp:"A 2012 IGM Forum survey found near-universal agreement that rent control reduces the quantity and quality of housing. While it helps incumbent tenants short-term, it worsens affordability for everyone else — a view shared across the ideological spectrum."},
 ];
-
-const ANTI_RENT_CONTROL_LINERS = [
-  "Rent control: making housing scarce since forever. Supply and demand still exists!",
-  "Nothing says affordable city like rent control driving away new construction!",
-  "Sweden tried rent control. Result: 20-year waitlists. Nice work, guys!",
-  "Rent control is just a subsidy for people lucky enough to already have apartments.",
-  "97% of economists oppose rent control. But sure, the heads know better.",
-  "Rent control creates housing black markets. Congratulations, you played yourself.",
-  "When you cap rent, investors build offices instead. Hope you like commuting!",
-  "San Francisco has had rent control since 1979. Still the least affordable city. Curious!",
-  "Freezing prices does not freeze costs. Landlords just stop maintaining buildings!",
-  "Rent control reduces rental supply by 15% per Stanford study. But feelings!",
-  "Want more housing? Build more housing. Want less? Rent control!",
-];
-
-const DECADEDANCES = [
-  { decade: "1950s", name: "THE TWIST!", emoji: "🕺", color: "#ff6b35", move: "twist" },
-  { decade: "1960s", name: "THE MASHED POTATO!", emoji: "💃", color: "#f7931e", move: "mash" },
-  { decade: "1970s", name: "DISCO FEVER!", emoji: "🪩", color: "#ffd700", move: "disco" },
-  { decade: "1980s", name: "THE RUNNING MAN!", emoji: "🏃", color: "#00ff41", move: "run" },
-  { decade: "1990s", name: "THE MACARENA!", emoji: "🙌", color: "#00bfff", move: "macarena" },
-  { decade: "2000s", name: "THE SOULJA BOY!", emoji: "✈️", color: "#9b59b6", move: "soulja" },
-  { decade: "2010s", name: "THE FLOSS!", emoji: "🦷", color: "#ff1493", move: "floss" },
-  { decade: "2020s", name: "THE GRIDDY!", emoji: "🏈", color: "#00ffcc", move: "griddy" },
-];
-
-const ONE_LINERS = [
-  "Head above water? Not anymore!","I told you to use your head... not LOSE it!","GOOOOOAL! Also, OUCH!",
-  "Keep your head in the game? Too late!","Nothing but net... and skull.","I'd say sorry, but that would be lying.",
-];
-
-const QUIZ_QUESTIONS = [
-  {
-    source: "abundance",
-    sourceLabel: "Abundance Liberal",
-    q: "A city is experiencing a housing affordability crisis. From an abundance liberal perspective, what is the most effective long-term solution?",
-    options: [
-      "Expand rent control to cover all units built after 1990",
-      "Upzone neighborhoods, streamline permitting, and build far more housing supply",
-      "Impose vacancy taxes and ban short-term rentals only",
-      "Freeze all new construction until rents stabilize"
-    ],
-    correct: 1,
-    explain: "Abundance liberals like Jerusalem Demsas and Ezra Klein argue that housing scarcity is the root cause of unaffordability. The answer is dramatically increasing supply through zoning reform and faster permitting — not price controls that reduce the incentive to build."
-  },
-  {
-    source: "heritage",
-    sourceLabel: "Heritage Foundation",
-    q: "According to Heritage Foundation economists, what does rent control primarily accomplish?",
-    options: [
-      "It ensures low-income families can afford rent in perpetuity",
-      "It reduces housing supply and quality while creating insider-outsider inequities",
-      "It stabilizes neighborhoods without affecting new construction",
-      "It is an effective short-term tool with no long-term downsides"
-    ],
-    correct: 1,
-    explain: "Heritage scholars argue rent control is a textbook price ceiling: it reduces supply as landlords convert units to condos or let them deteriorate, while benefiting current tenants at the expense of future renters who can't find housing at all."
-  },
-  {
-    source: "abundance",
-    sourceLabel: "Abundance Liberal",
-    q: "A Stanford study by Diamond et al. (2019) found that San Francisco's rent control caused landlords to reduce rental housing supply by how much?",
-    options: [
-      "About 2%",
-      "About 7%",
-      "About 15%",
-      "About 30%"
-    ],
-    correct: 2,
-    explain: "The Diamond et al. Stanford study found rent control reduced rental supply by roughly 15% as landlords converted apartments to condos or redeveloped properties. The policy protected existing tenants but made the overall affordability crisis worse by shrinking supply."
-  },
-  {
-    source: "heritage",
-    sourceLabel: "Heritage Foundation",
-    q: "From a Heritage Foundation free-market perspective, what government policy would best improve housing affordability?",
-    options: [
-      "Federal rent control legislation applying to all cities",
-      "Eliminate exclusionary zoning laws, reduce regulations, and let markets build",
-      "A national rent subsidy program funded by a landlord windfall tax",
-      "Government construction of public housing in all major metros"
-    ],
-    correct: 1,
-    explain: "Heritage argues that government-created barriers — single-family zoning, building codes, parking minimums, lengthy environmental review — are what made housing expensive in the first place. Deregulating land use lets the private market build more housing and drive down costs competitively."
-  },
-  {
-    source: "abundance",
-    sourceLabel: "Abundance Liberal",
-    q: "Abundance liberals often cite Vienna, Austria as a housing model. What does Vienna do that many American abundance advocates support?",
-    options: [
-      "Strict citywide rent control on all private units",
-      "Ban on private landlords — all rental housing must be publicly owned",
-      "Massive public and social housing construction alongside a permissive private market",
-      "Lottery-based housing assignment regardless of income"
-    ],
-    correct: 2,
-    explain: "Abundance liberals point to Vienna's model of building enormous amounts of social housing (nearly 60% of residents live in subsidized or city-owned housing) while also allowing a functioning private market. The key is supply — public OR private — not price controls on existing units."
-  },
-  {
-    source: "heritage",
-    sourceLabel: "Heritage Foundation",
-    q: "Heritage Foundation research on New York City's rent stabilization system found it disproportionately benefits which group?",
-    options: [
-      "Recent low-income immigrants entering the rental market",
-      "Long-term tenants — many of whom are wealthier than market-rate renters",
-      "Young renters trying to find their first apartment",
-      "Residents of high-poverty neighborhoods"
-    ],
-    correct: 1,
-    explain: "Heritage and other researchers have found that rent-stabilized apartments in NYC are often occupied by long-term residents whose incomes have grown substantially — including households earning over $100K. Meanwhile low-income newcomers face a nearly impossible rental market with few vacancies."
-  },
-  {
-    source: "abundance",
-    sourceLabel: "Abundance Liberal",
-    q: "Minneapolis abolished single-family-only zoning in 2040 Plan, allowing duplexes and triplexes citywide. What happened to rents compared to peer cities?",
-    options: [
-      "Rents rose faster than peer cities due to gentrification pressure",
-      "Rents stayed exactly the same — zoning had no effect",
-      "Rents fell significantly relative to peer cities as more units were built",
-      "Rents fell only in wealthy neighborhoods, rising everywhere else"
-    ],
-    correct: 2,
-    explain: "Studies found Minneapolis rents grew much slower (or fell) relative to comparable Midwestern cities after zoning reform spurred new construction. This is the abundance liberal thesis in action: more supply = more affordability. No rent control required."
-  },
-  {
-    source: "heritage",
-    sourceLabel: "Heritage Foundation",
-    q: "Economists across the political spectrum — including those at MIT, Princeton, and Stanford — largely agree on rent control. What is their consensus view?",
-    options: [
-      "Rent control is an effective tool when applied carefully to specific market segments",
-      "Rent control benefits tenants but harms landlords in a zero-sum way",
-      "Rent control reduces housing supply and quality, harming long-run affordability",
-      "The evidence is too mixed to draw firm conclusions"
-    ],
-    correct: 2,
-    explain: "A 2012 IGM Forum survey of top economists found near-universal agreement that rent control reduces the quantity and quality of housing. While it helps incumbent tenants in the short run, it worsens affordability for everyone else and degrades the housing stock over time — a view shared across the ideological spectrum from MIT's Daron Acemoglu to Heritage's economists."
-  },
-];
-
-// ---- QUIZ LOGIC ----
-let quizAnswers = 0, quizTotal = 0;
-
-function showQuiz() {
-  gameRunning = false;
-  document.getElementById("quiz-screen").style.display = "block";
-  document.getElementById("finish-btn").style.display = "none";
-  quizAnswers = 0; quizTotal = QUIZ_QUESTIONS.length;
-  const container = document.getElementById("quiz-questions");
-  container.innerHTML = "";
-  document.getElementById("quiz-result").style.display = "none";
-  document.getElementById("quiz-score-bar").style.display = "none";
-
-  QUIZ_QUESTIONS.forEach((q, idx) => {
-    const block = document.createElement("div");
-    block.className = "q-block";
-    const isAbundance = q.source === "abundance";
-    block.innerHTML =
-      `<div class="source-tag ${isAbundance ? "source-abundance" : "source-heritage"}">${isAbundance ? "🏗️ Abundance Liberal" : "🦅 Heritage Foundation"}</div>` +
-      `<div class="q-text">Q${idx+1}. ${q.q}</div>`;
-    q.options.forEach((opt, oi) => {
-      const btn = document.createElement("button");
-      btn.className = "q-option";
-      btn.textContent = String.fromCharCode(65+oi) + ". " + opt;
-      btn.onclick = function() { answerQuestion(idx, oi, block, q); };
-      block.appendChild(btn);
-    });
-    const explain = document.createElement("div");
-    explain.className = "q-explain";
-    explain.id = "explain-" + idx;
-    explain.textContent = q.explain;
-    block.appendChild(explain);
-    container.appendChild(block);
-  });
-}
-
-function answerQuestion(qIdx, chosen, block, q) {
-  const btns = block.querySelectorAll(".q-option");
-  btns.forEach(b => { b.disabled = true; });
-  btns[chosen].classList.add(chosen === q.correct ? "correct" : "wrong");
-  if (chosen !== q.correct) btns[q.correct].classList.add("correct");
-  document.getElementById("explain-" + qIdx).style.display = "block";
-  if (chosen === q.correct) quizAnswers++;
-  // Check if all answered
-  const allExplains = document.querySelectorAll(".q-explain");
-  const answered = Array.from(allExplains).filter(e => e.style.display === "block").length;
-  if (answered === quizTotal) showQuizResult();
-}
-
-function showQuizResult() {
-  const pct = Math.round((quizAnswers / quizTotal) * 100);
-  let title, text;
-  if (pct >= 88) {
-    title = "🏆 HOUSING ECONOMIST! (" + quizAnswers + "/" + quizTotal + ")";
-    text = "Impressive! You understand why rent control fails on its own terms — it reduces supply, creates inequality between insiders and outsiders, and worsens the very crisis it claims to solve. Both abundance liberals and market conservatives agree: build more housing!";
-  } else if (pct >= 60) {
-    title = "📈 PRETTY GOOD! (" + quizAnswers + "/" + quizTotal + ")";
-    text = "Solid understanding of housing economics. The key takeaway: rent control helps current tenants at the cost of future renters and overall supply. The real fix — whether you're a progressive or a libertarian — is more homes.";
-  } else if (pct >= 38) {
-    title = "📚 NEEDS MORE READING (" + quizAnswers + "/" + quizTotal + ")";
-    text = "Housing economics is tricky! The counterintuitive truth: price controls tend to reduce the supply of the very thing you're trying to make affordable. Check out work by Jenny Schuetz, Jerusalem Demsas, or the Cato/Heritage housing research for more.";
-  } else {
-    title = "🏠 THE HEADS HAVE CONVINCED YOU (" + quizAnswers + "/" + quizTotal + ")";
-    text = "Those disembodied heads really got to you, huh? Don't worry — it's never too late to learn why 97% of economists, from left to right, think rent control makes housing markets worse. Start with the Stanford Diamond et al. (2019) study!";
-  }
-  const result = document.getElementById("quiz-result");
-  document.getElementById("result-title").textContent = title;
-  document.getElementById("result-text").textContent = text;
-  result.style.display = "block";
-  result.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-function restartGame() {
-  document.getElementById("quiz-screen").style.display = "none";
-  score = 0; kickCount = 0; comboCount = 0; heads = []; particles = []; floatingTexts = [];
-  activeBubbles.forEach(b => b.el.remove()); activeBubbles.length = 0;
-  document.getElementById("score").textContent = "0";
-  document.getElementById("kicks").textContent = "0";
-  document.getElementById("finish-btn").style.display = "none";
-  gameRunning = true;
-  for (let i=0;i<5;i++) setTimeout(spawnHead, i*300);
-}
-
-// ---- STICK FIGURE ----
-const player = { dancing:false, dance:null, danceFrame:0, danceDuration:180 };
-
-function drawStickFigure(x, y, t, move, color) {
-  ctx.save(); ctx.strokeStyle = color||'#fff'; ctx.lineWidth=3; ctx.lineCap='round';
-  const s=28; let lA=-Math.PI/4,rA=-Math.PI*3/4,lL=Math.PI/8,rL=-Math.PI/8,tilt=0,hip=0;
-  const bounce=Math.sin(t*0.3)*4;
-  if(move==='twist'){tilt=Math.sin(t*0.2)*0.3;hip=Math.sin(t*0.2)*10;lA=-Math.PI/3+Math.sin(t*0.2)*0.5;rA=-Math.PI*2/3+Math.sin(t*0.2)*0.5;lL=Math.PI/5+Math.sin(t*0.2)*0.2;rL=-Math.PI/5-Math.sin(t*0.2)*0.2;}
-  else if(move==='mash'){lL=Math.PI/4+Math.sin(t*0.25)*0.3;rL=-Math.PI/4-Math.sin(t*0.25)*0.3;lA=-Math.PI/2+Math.cos(t*0.25)*0.4;rA=-Math.PI/2-Math.cos(t*0.25)*0.4;hip=Math.sin(t*0.5)*6;}
-  else if(move==='disco'){const ph=Math.floor(t/15)%2;lA=ph===0?-Math.PI*0.9:-Math.PI/6;rA=ph===0?-Math.PI/6:-Math.PI*0.9;lL=Math.PI/6+Math.sin(t*0.3)*0.2;rL=-Math.PI/6-Math.sin(t*0.3)*0.2;hip=Math.sin(t*0.3)*8;}
-  else if(move==='run'){lA=-Math.PI/2+Math.sin(t*0.4)*0.6;rA=-Math.PI/2-Math.sin(t*0.4)*0.6;lL=Math.PI/3*Math.sin(t*0.4+Math.PI);rL=Math.PI/3*Math.sin(t*0.4);hip=Math.sin(t*0.4)*5;}
-  else if(move==='macarena'){const st=Math.floor(t/12)%8;if(st===0){lA=-Math.PI/6;rA=-Math.PI*5/6;}else if(st===1){lA=rA=-Math.PI/6;}else if(st===2){lA=-Math.PI/2;rA=-Math.PI/6;}else if(st===3){lA=rA=-Math.PI/2;}else if(st===4){lA=-Math.PI*3/4;rA=-Math.PI/2;}else if(st===5){lA=rA=-Math.PI*3/4;}else{lA=rA=-Math.PI/2;hip=12;}lL=Math.PI/10;rL=-Math.PI/10;}
-  else if(move==='soulja'){lA=rA=-Math.PI/2+Math.sin(t*0.3)*0.15;tilt=Math.sin(t*0.2)*0.15;lL=Math.PI/6+Math.sin(t*0.35)*0.3;rL=-Math.PI/6-Math.sin(t*0.35)*0.3;hip=Math.sin(t*0.35)*7;}
-  else if(move==='floss'){const fp=Math.sin(t*0.25);lA=rA=-Math.PI/2+fp;hip=fp*14;lL=Math.PI/10;rL=-Math.PI/10;}
-  else if(move==='griddy'){lL=Math.PI/3*Math.max(0,Math.sin(t*0.35+Math.PI));rL=Math.PI/3*Math.max(0,Math.sin(t*0.35));lA=-Math.PI/2-Math.sin(t*0.35+Math.PI)*0.5;rA=-Math.PI/2+Math.sin(t*0.35+Math.PI)*0.5;hip=Math.sin(t*0.35)*6;tilt=Math.sin(t*0.35)*0.08;}
-  ctx.translate(x+hip,y+bounce); ctx.rotate(tilt);
-  ctx.beginPath();ctx.arc(0,-s*2.2,s*0.5,0,Math.PI*2);ctx.fillStyle='#ffe0b2';ctx.fill();ctx.stroke();
-  ctx.fillStyle='#333';ctx.beginPath();ctx.arc(-7,-s*2.35,2.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(7,-s*2.35,2.5,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(0,-s*2.1,8,0.1,Math.PI-0.1);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,-s*1.7);ctx.lineTo(0,0);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,-s*1.4);ctx.lineTo(Math.cos(lA)*s*1.1,-s*1.4+Math.sin(lA)*s*1.1);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,-s*1.4);ctx.lineTo(Math.cos(rA)*s*1.1,-s*1.4+Math.sin(rA)*s*1.1);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(Math.PI/2+lL)*s,Math.sin(Math.PI/2+lL)*s);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(Math.PI/2+rL)*s,Math.sin(Math.PI/2+rL)*s);ctx.stroke();
-  ctx.restore();
-}
-
-function showSpeechBubble(head,text){const el=document.createElement('div');el.className='speech-bubble';el.textContent=text;document.body.appendChild(el);activeBubbles.push({el,head,createdAt:Date.now(),duration:4500});}
-function updateBubbles(){const now=Date.now();for(let i=activeBubbles.length-1;i>=0;i--){const b=activeBubbles[i],age=now-b.createdAt;if(age>b.duration){b.el.remove();activeBubbles.splice(i,1);continue;}if(age>b.duration-600)b.el.style.opacity=((b.duration-age)/600).toFixed(2);const hw=b.el.offsetWidth||200,hh=b.el.offsetHeight||60;b.el.style.left=(b.head.x-hw/2)+'px';b.el.style.top=(b.head.y-b.head.size-hh-14)+'px';}}
-
-function spawnHead(){if(!gameRunning)return;const size=50+Math.random()*40,emoji=FACE_EMOJIS[Math.floor(Math.random()*FACE_EMOJIS.length)];const side=Math.floor(Math.random()*4);let x,y;if(side===0){x=-size;y=Math.random()*canvas.height;}else if(side===1){x=canvas.width+size;y=Math.random()*canvas.height;}else if(side===2){x=Math.random()*canvas.width;y=-size;}else{x=Math.random()*canvas.width;y=canvas.height+size;}const tx=canvas.width*0.3+Math.random()*canvas.width*0.4,ty=canvas.height*0.3+Math.random()*canvas.height*0.4,dx=(tx-x)/(100+Math.random()*100),dy=(ty-y)/(100+Math.random()*100);heads.push({x,y,size,dx,dy,emoji,rotation:0,rotSpeed:(Math.random()-0.5)*0.1,kicked:false});}
-function spawnParticles(x,y,color){for(let i=0;i<20;i++){const a=Math.random()*Math.PI*2,sp=3+Math.random()*8;particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,decay:0.03+Math.random()*0.04,size:4+Math.random()*8,color:color||('hsl('+(Math.random()*360)+',100%,60%)')});}}
-function addFT(x,y,text,color){floatingTexts.push({x,y,text,color:color||'#fff',life:1,vy:-2,size:24});}
-
-function kickHead(head,mx,my){const dx=head.x-mx,dy=head.y-my,dist=Math.sqrt(dx*dx+dy*dy)||1,force=15+Math.random()*10;head.dx=(dx/dist)*force;head.dy=(dy/dist)*force;head.rotSpeed=(Math.random()-0.5)*0.4;head.kicked=true;head.kickTimer=200;kickCount++;comboCount++;clearTimeout(comboTimer);comboTimer=setTimeout(()=>{comboCount=0;updateCombo();},1500);const pts=comboCount*100;score+=pts;document.getElementById('score').textContent=score;document.getElementById('kicks').textContent=kickCount;updateCombo();spawnParticles(head.x,head.y);addFT(head.x,head.y-head.size,comboCount>1?'x'+comboCount+' +'+pts:'+'+pts,comboCount>2?'#ffd700':'#fff');showSpeechBubble(head,RENT_CONTROL_QUOTES[Math.floor(Math.random()*RENT_CONTROL_QUOTES.length)]);if(kickCount===20){document.getElementById('finish-btn').style.display='block';document.getElementById('instructions').innerHTML='You unlocked the QUIZ! <span style="color:#ffd700">Click TAKE THE QUIZ or keep kicking!</span>';}if(kickCount%5===0)triggerDanceParty();else showOneLiner();}
-function updateCombo(){const el=document.getElementById('combo');if(comboCount>1){el.style.display='block';el.textContent='COMBO x'+comboCount+'!';}else el.style.display='none';}
-function showOneLiner(){const el=document.getElementById('oneliner');el.textContent='"'+ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)]+'"';el.style.display='block';clearTimeout(window._oneTimeout);window._oneTimeout=setTimeout(()=>{el.style.display='none';},3000);}
-function showAntiRentLiner(dance){const el=document.getElementById('anti-rent-banner');el.textContent='🎤 "'+ANTI_RENT_CONTROL_LINERS[Math.floor(Math.random()*ANTI_RENT_CONTROL_LINERS.length)]+'"';el.style.borderColor=dance.color;el.style.display='block';clearTimeout(window._antiTimeout);window._antiTimeout=setTimeout(()=>{el.style.display='none';},5000);}
-function triggerDanceParty(){if(isDancing)return;isDancing=true;const dance=DECADEDANCES[Math.floor(Math.random()*DECADEDANCES.length)];const el=document.getElementById('dance-label');el.innerHTML=dance.emoji+' '+dance.decade+' — '+dance.name+' '+dance.emoji;el.style.color=dance.color;el.style.display='block';player.dancing=true;player.dance=dance;player.danceFrame=0;player.danceDuration=180;heads.forEach(h=>{h.dancing=true;h.danceAngle=Math.random()*Math.PI*2;h.danceSpeed=0.05+Math.random()*0.05;});for(let i=0;i<6;i++)setTimeout(()=>spawnParticles(Math.random()*canvas.width,Math.random()*canvas.height,'hsl('+(Math.random()*360)+',100%,60%)'),i*150);setTimeout(()=>{el.style.display='none';heads.forEach(h=>{h.dancing=false;});player.dancing=false;isDancing=false;showAntiRentLiner(dance);},3100);}
-
-canvas.addEventListener('click',(e)=>{if(!gameRunning)return;const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;let hit=false;for(let i=heads.length-1;i>=0;i--){const h=heads[i];if(Math.sqrt((h.x-mx)**2+(h.y-my)**2)<h.size){kickHead(h,mx,my);hit=true;break;}}if(!hit){spawnParticles(mx,my,'#ff0000');addFT(mx,my,'MISS!','#ff4444');comboCount=0;updateCombo();}});
-
-function drawHead(h){ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.rotation);ctx.beginPath();ctx.arc(4,4,h.size,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fill();ctx.beginPath();ctx.arc(0,0,h.size,0,Math.PI*2);ctx.fillStyle=h.kicked?'#ffcc99':'#ffd1a0';ctx.fill();ctx.strokeStyle=h.kicked?'#c0392b':'#8B4513';ctx.lineWidth=h.kicked?4:3;ctx.stroke();ctx.font=(h.size*1.1)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(h.kicked?'\u{1F5E3}\uFE0F':h.emoji,0,2);ctx.restore();}
-
-let spawnTimer=0,frameCount=0;
-function gameLoop(){if(!gameRunning){requestAnimationFrame(gameLoop);return;}frameCount++;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;for(let x=0;x<canvas.width;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}for(let y=0;y<canvas.height;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}spawnTimer++;if(spawnTimer>90&&heads.length<12){spawnHead();spawnTimer=0;}for(let i=heads.length-1;i>=0;i--){const h=heads[i];if(h.dancing){h.danceAngle+=h.danceSpeed;h.x+=Math.cos(h.danceAngle)*3;h.y+=Math.sin(h.danceAngle*1.3)*3;}else{h.x+=h.dx;h.y+=h.dy;h.dx*=0.99;h.dy*=0.99;}h.rotation+=h.rotSpeed;if(h.x-h.size<0){h.x=h.size;h.dx=Math.abs(h.dx);}if(h.x+h.size>canvas.width){h.x=canvas.width-h.size;h.dx=-Math.abs(h.dx);}if(h.y-h.size<0){h.y=h.size;h.dy=Math.abs(h.dy);}if(h.y+h.size>canvas.height){h.y=canvas.height-h.size;h.dy=-Math.abs(h.dy);}if(h.kickTimer>0)h.kickTimer--;drawHead(h);if(!h.kicked&&!h.dancing&&(h.x<-200||h.x>canvas.width+200||h.y<-200||h.y>canvas.height+200))heads.splice(i,1);}for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.2;p.life-=p.decay;if(p.life<=0){particles.splice(i,1);continue;}ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.life;ctx.fill();ctx.globalAlpha=1;}for(let i=floatingTexts.length-1;i>=0;i--){const t=floatingTexts[i];t.y+=t.vy;t.life-=0.02;if(t.life<=0){floatingTexts.splice(i,1);continue;}ctx.font='bold '+t.size+'px Arial';ctx.textAlign='center';ctx.fillStyle=t.color;ctx.globalAlpha=t.life;ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y);ctx.globalAlpha=1;}if(player.dancing&&player.dance){player.danceFrame++;const px=canvas.width/2,py=canvas.height-80;const grad=ctx.createRadialGradient(px,py+10,10,px,py+10,80);grad.addColorStop(0,player.dance.color+'aa');grad.addColorStop(1,'transparent');ctx.beginPath();ctx.ellipse(px,py+12,75,22,0,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();ctx.font='bold 15px Arial';ctx.textAlign='center';ctx.fillStyle=player.dance.color;ctx.globalAlpha=0.9;ctx.fillText('YOU',px,py-90);ctx.globalAlpha=1;drawStickFigure(px,py,player.danceFrame,player.dance.move,player.dance.color);if(player.danceFrame>=player.danceDuration){player.dancing=false;player.dance=null;}}updateBubbles();requestAnimationFrame(gameLoop);}
-for(let i=0;i<5;i++)setTimeout(spawnHead,i*300);
+var quizAnswered=0,quizTotal=QS.length;
+function showQuiz(){gameRunning=false;document.getElementById("quiz-screen").style.display="block";document.getElementById("finish-btn").style.display="none";quizAnswered=0;var cont=document.getElementById("quiz-questions");cont.innerHTML="";document.getElementById("quiz-result").style.display="none";QS.forEach(function(q,idx){var block=document.createElement("div");block.className="q-block";var isAb=q.src==="abundance";var tag=document.createElement("div");tag.className="source-tag "+(isAb?"source-abundance":"source-heritage");tag.textContent=q.lbl;block.appendChild(tag);var qt=document.createElement("div");qt.className="q-text";qt.textContent="Q"+(idx+1)+". "+q.q;block.appendChild(qt);q.opts.forEach(function(opt,oi){var btn=document.createElement("button");btn.className="q-option";btn.textContent=String.fromCharCode(65+oi)+". "+opt;btn.onclick=(function(b,o,bl,qq){return function(){answerQ(b,o,bl,qq);};})(idx,oi,block,q);block.appendChild(btn);});var exp=document.createElement("div");exp.className="q-explain";exp.id="exp-"+idx;exp.textContent=q.exp;block.appendChild(exp);cont.appendChild(block);});}
+function answerQ(qIdx,chosen,block,q){var btns=block.querySelectorAll(".q-option");btns.forEach(function(b){b.disabled=true;});btns[chosen].classList.add(chosen===q.ans?"correct":"wrong");if(chosen!==q.ans)btns[q.ans].classList.add("correct");document.getElementById("exp-"+qIdx).style.display="block";if(chosen===q.ans)quizAnswered++;var done=document.querySelectorAll(".q-explain[style*=block]").length;if(done>=quizTotal)showResult();}
+function showResult(){var pct=Math.round((quizAnswered/quizTotal)*100);var title,text;if(pct>=88){title="🏆 HOUSING ECONOMIST! ("+quizAnswered+"/"+quizTotal+")";text="Impressive! You understand why rent control fails — it reduces supply, creates inequality between insiders and outsiders, and worsens the very crisis it claims to solve. Both abundance liberals and market conservatives agree: build more housing!";}else if(pct>=60){title="📈 PRETTY GOOD! ("+quizAnswered+"/"+quizTotal+")";text="Solid understanding of housing economics. The key takeaway: rent control helps current tenants at the cost of future renters and overall supply. The real fix — progressive or libertarian — is more homes.";}else if(pct>=38){title="📚 NEEDS MORE READING ("+quizAnswered+"/"+quizTotal+")";text="Housing economics is tricky! Price controls tend to reduce the supply of the very thing you're trying to make affordable. Check out Jenny Schuetz, Jerusalem Demsas, or Cato/Heritage housing research.";}else{title="🏠 THE HEADS HAVE CONVINCED YOU ("+quizAnswered+"/"+quizTotal+")";text="Those disembodied heads really got to you! Don't worry — it's never too late to learn why 97% of economists, left to right, think rent control makes housing markets worse. Start with Stanford's Diamond et al. (2019) study!";}document.getElementById("result-title").textContent=title;document.getElementById("result-text").textContent=text;var res=document.getElementById("quiz-result");res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});}
+function restartGame(){document.getElementById("quiz-screen").style.display="none";score=0;kickCount=0;comboCount=0;heads=[];particles=[];floatingTexts=[];activeBubbles.forEach(function(b){b.el.remove();});activeBubbles.length=0;document.getElementById("score").textContent="0";document.getElementById("kicks").textContent="0";document.getElementById("finish-btn").style.display="none";gameRunning=true;for(var i=0;i<5;i++)(function(j){setTimeout(spawnHead,j*300);})(i);}
+var player={dancing:false,dance:null,danceFrame:0,danceDuration:180};
+function drawStickFigure(x,y,t,move,color){ctx.save();ctx.strokeStyle=color||"#fff";ctx.lineWidth=3;ctx.lineCap="round";var s=28,lA=-Math.PI/4,rA=-Math.PI*3/4,lL=Math.PI/8,rL=-Math.PI/8,tilt=0,hip=0,bounce=Math.sin(t*0.3)*4;if(move==="twist"){tilt=Math.sin(t*0.2)*0.3;hip=Math.sin(t*0.2)*10;lA=-Math.PI/3+Math.sin(t*0.2)*0.5;rA=-Math.PI*2/3+Math.sin(t*0.2)*0.5;lL=Math.PI/5+Math.sin(t*0.2)*0.2;rL=-Math.PI/5-Math.sin(t*0.2)*0.2;}else if(move==="mash"){lL=Math.PI/4+Math.sin(t*0.25)*0.3;rL=-Math.PI/4-Math.sin(t*0.25)*0.3;lA=-Math.PI/2+Math.cos(t*0.25)*0.4;rA=-Math.PI/2-Math.cos(t*0.25)*0.4;hip=Math.sin(t*0.5)*6;}else if(move==="disco"){var ph=Math.floor(t/15)%2;lA=ph===0?-Math.PI*0.9:-Math.PI/6;rA=ph===0?-Math.PI/6:-Math.PI*0.9;lL=Math.PI/6+Math.sin(t*0.3)*0.2;rL=-Math.PI/6-Math.sin(t*0.3)*0.2;hip=Math.sin(t*0.3)*8;}else if(move==="run"){lA=-Math.PI/2+Math.sin(t*0.4)*0.6;rA=-Math.PI/2-Math.sin(t*0.4)*0.6;lL=Math.PI/3*Math.sin(t*0.4+Math.PI);rL=Math.PI/3*Math.sin(t*0.4);hip=Math.sin(t*0.4)*5;}else if(move==="macarena"){var st=Math.floor(t/12)%8;if(st===0){lA=-Math.PI/6;rA=-Math.PI*5/6;}else if(st===1){lA=-Math.PI/6;rA=-Math.PI/6;}else if(st===2){lA=-Math.PI/2;rA=-Math.PI/6;}else if(st===3){lA=-Math.PI/2;rA=-Math.PI/2;}else if(st===4){lA=-Math.PI*3/4;rA=-Math.PI/2;}else if(st===5){lA=-Math.PI*3/4;rA=-Math.PI*3/4;}else{lA=-Math.PI/2;rA=-Math.PI/2;hip=12;}lL=Math.PI/10;rL=-Math.PI/10;}else if(move==="soulja"){lA=rA=-Math.PI/2+Math.sin(t*0.3)*0.15;tilt=Math.sin(t*0.2)*0.15;lL=Math.PI/6+Math.sin(t*0.35)*0.3;rL=-Math.PI/6-Math.sin(t*0.35)*0.3;hip=Math.sin(t*0.35)*7;}else if(move==="floss"){var fp=Math.sin(t*0.25);lA=rA=-Math.PI/2+fp;hip=fp*14;lL=Math.PI/10;rL=-Math.PI/10;}else if(move==="griddy"){lL=Math.PI/3*Math.max(0,Math.sin(t*0.35+Math.PI));rL=Math.PI/3*Math.max(0,Math.sin(t*0.35));lA=-Math.PI/2-Math.sin(t*0.35+Math.PI)*0.5;rA=-Math.PI/2+Math.sin(t*0.35+Math.PI)*0.5;hip=Math.sin(t*0.35)*6;tilt=Math.sin(t*0.35)*0.08;}ctx.translate(x+hip,y+bounce);ctx.rotate(tilt);ctx.beginPath();ctx.arc(0,-s*2.2,s*0.5,0,Math.PI*2);ctx.fillStyle="#ffe0b2";ctx.fill();ctx.stroke();ctx.fillStyle="#333";ctx.beginPath();ctx.arc(-7,-s*2.35,2.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(7,-s*2.35,2.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(0,-s*2.1,8,0.1,Math.PI-0.1);ctx.stroke();ctx.beginPath();ctx.moveTo(0,-s*1.7);ctx.lineTo(0,0);ctx.stroke();ctx.beginPath();ctx.moveTo(0,-s*1.4);ctx.lineTo(Math.cos(lA)*s*1.1,-s*1.4+Math.sin(lA)*s*1.1);ctx.stroke();ctx.beginPath();ctx.moveTo(0,-s*1.4);ctx.lineTo(Math.cos(rA)*s*1.1,-s*1.4+Math.sin(rA)*s*1.1);ctx.stroke();ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(Math.PI/2+lL)*s,Math.sin(Math.PI/2+lL)*s);ctx.stroke();ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(Math.PI/2+rL)*s,Math.sin(Math.PI/2+rL)*s);ctx.stroke();ctx.restore();}
+function showBubble(head,text){var el=document.createElement("div");el.className="speech-bubble";el.textContent=text;document.body.appendChild(el);activeBubbles.push({el:el,head:head,createdAt:Date.now(),duration:4500});}
+function updateBubbles(){var now=Date.now();for(var i=activeBubbles.length-1;i>=0;i--){var b=activeBubbles[i],age=now-b.createdAt;if(age>b.duration){b.el.remove();activeBubbles.splice(i,1);continue;}if(age>b.duration-600)b.el.style.opacity=((b.duration-age)/600).toFixed(2);var hw=b.el.offsetWidth||200,hh=b.el.offsetHeight||60;b.el.style.left=(b.head.x-hw/2)+"px";b.el.style.top=(b.head.y-b.head.size-hh-14)+"px";}}
+function spawnHead(){if(!gameRunning)return;var size=50+Math.random()*40,emoji=FACE_EMOJIS[Math.floor(Math.random()*FACE_EMOJIS.length)],side=Math.floor(Math.random()*4),x,y;if(side===0){x=-size;y=Math.random()*canvas.height;}else if(side===1){x=canvas.width+size;y=Math.random()*canvas.height;}else if(side===2){x=Math.random()*canvas.width;y=-size;}else{x=Math.random()*canvas.width;y=canvas.height+size;}var tx=canvas.width*0.3+Math.random()*canvas.width*0.4,ty=canvas.height*0.3+Math.random()*canvas.height*0.4;heads.push({x:x,y:y,size:size,dx:(tx-x)/(100+Math.random()*100),dy:(ty-y)/(100+Math.random()*100),emoji:emoji,rotation:0,rotSpeed:(Math.random()-0.5)*0.1,kicked:false});}
+function spawnParticles(x,y,color){for(var i=0;i<20;i++){var a=Math.random()*Math.PI*2,sp=3+Math.random()*8;particles.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,decay:0.03+Math.random()*0.04,size:4+Math.random()*8,color:color||("hsl("+(Math.random()*360)+",100%,60%)")});}}
+function addFT(x,y,text,color){floatingTexts.push({x:x,y:y,text:text,color:color||"#fff",life:1,vy:-2,size:24});}
+function kickHead(head,mx,my){var dx=head.x-mx,dy=head.y-my,dist=Math.sqrt(dx*dx+dy*dy)||1,force=15+Math.random()*10;head.dx=(dx/dist)*force;head.dy=(dy/dist)*force;head.rotSpeed=(Math.random()-0.5)*0.4;head.kicked=true;head.kickTimer=200;kickCount++;comboCount++;clearTimeout(comboTimer);comboTimer=setTimeout(function(){comboCount=0;updateCombo();},1500);var pts=comboCount*100;score+=pts;document.getElementById("score").textContent=score;document.getElementById("kicks").textContent=kickCount;updateCombo();spawnParticles(head.x,head.y);addFT(head.x,head.y-head.size,comboCount>1?"x"+comboCount+" +"+pts:"+"+pts,comboCount>2?"#ffd700":"#fff");showBubble(head,RENT_QUOTES[Math.floor(Math.random()*RENT_QUOTES.length)]);if(kickCount===20){document.getElementById("finish-btn").style.display="block";document.getElementById("instructions").innerHTML="You unlocked the QUIZ!<br><span style='color:#ffd700'>Click TAKE THE QUIZ or keep kicking!</span>";}if(kickCount%5===0)triggerDance();else showOneLiner();}
+function updateCombo(){var el=document.getElementById("combo");if(comboCount>1){el.style.display="block";el.textContent="COMBO x"+comboCount+"!";}else el.style.display="none";}
+function showOneLiner(){var el=document.getElementById("oneliner");el.textContent='"'+ONE_LINERS[Math.floor(Math.random()*ONE_LINERS.length)]+'"';el.style.display="block";clearTimeout(window._oneT);window._oneT=setTimeout(function(){el.style.display="none";},3000);}
+function showAntiRent(dance){var el=document.getElementById("anti-rent-banner");el.textContent="🎤 ""+ANTI_QUOTES[Math.floor(Math.random()*ANTI_QUOTES.length)]+""";el.style.borderColor=dance.color;el.style.display="block";clearTimeout(window._antiT);window._antiT=setTimeout(function(){el.style.display="none";},5000);}
+function triggerDance(){if(isDancing)return;isDancing=true;var dance=DANCES[Math.floor(Math.random()*DANCES.length)];var el=document.getElementById("dance-label");el.innerHTML=dance.emoji+" "+dance.decade+" — "+dance.name+" "+dance.emoji;el.style.color=dance.color;el.style.display="block";player.dancing=true;player.dance=dance;player.danceFrame=0;player.danceDuration=180;heads.forEach(function(h){h.dancing=true;h.danceAngle=Math.random()*Math.PI*2;h.danceSpeed=0.05+Math.random()*0.05;});for(var i=0;i<6;i++)(function(j){setTimeout(function(){spawnParticles(Math.random()*canvas.width,Math.random()*canvas.height,"hsl("+(Math.random()*360)+",100%,60%)");},j*150);})(i);setTimeout(function(){el.style.display="none";heads.forEach(function(h){h.dancing=false;});player.dancing=false;isDancing=false;showAntiRent(dance);},3100);}
+canvas.addEventListener("click",function(e){if(!gameRunning)return;var rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,hit=false;for(var i=heads.length-1;i>=0;i--){var h=heads[i];if(Math.sqrt(Math.pow(h.x-mx,2)+Math.pow(h.y-my,2))<h.size){kickHead(h,mx,my);hit=true;break;}}if(!hit){spawnParticles(mx,my,"#ff0000");addFT(mx,my,"MISS!","#ff4444");comboCount=0;updateCombo();}});
+function drawHead(h){ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.rotation);ctx.beginPath();ctx.arc(4,4,h.size,0,Math.PI*2);ctx.fillStyle="rgba(0,0,0,0.3)";ctx.fill();ctx.beginPath();ctx.arc(0,0,h.size,0,Math.PI*2);ctx.fillStyle=h.kicked?"#ffcc99":"#ffd1a0";ctx.fill();ctx.strokeStyle=h.kicked?"#c0392b":"#8B4513";ctx.lineWidth=h.kicked?4:3;ctx.stroke();ctx.font=(h.size*1.1)+"px serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(h.kicked?"🗣️":h.emoji,0,2);ctx.restore();}
+var spawnTimer=0,frameCount=0;
+function gameLoop(){if(!gameRunning){requestAnimationFrame(gameLoop);return;}frameCount++;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.strokeStyle="rgba(255,255,255,0.03)";ctx.lineWidth=1;for(var gx=0;gx<canvas.width;gx+=60){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,canvas.height);ctx.stroke();}for(var gy=0;gy<canvas.height;gy+=60){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(canvas.width,gy);ctx.stroke();}spawnTimer++;if(spawnTimer>90&&heads.length<12){spawnHead();spawnTimer=0;}for(var i=heads.length-1;i>=0;i--){var h=heads[i];if(h.dancing){h.danceAngle+=h.danceSpeed;h.x+=Math.cos(h.danceAngle)*3;h.y+=Math.sin(h.danceAngle*1.3)*3;}else{h.x+=h.dx;h.y+=h.dy;h.dx*=0.99;h.dy*=0.99;}h.rotation+=h.rotSpeed;if(h.x-h.size<0){h.x=h.size;h.dx=Math.abs(h.dx);}if(h.x+h.size>canvas.width){h.x=canvas.width-h.size;h.dx=-Math.abs(h.dx);}if(h.y-h.size<0){h.y=h.size;h.dy=Math.abs(h.dy);}if(h.y+h.size>canvas.height){h.y=canvas.height-h.size;h.dy=-Math.abs(h.dy);}if(h.kickTimer>0)h.kickTimer--;drawHead(h);if(!h.kicked&&!h.dancing&&(h.x<-200||h.x>canvas.width+200||h.y<-200||h.y>canvas.height+200))heads.splice(i,1);}for(var pi=particles.length-1;pi>=0;pi--){var p=particles[pi];p.x+=p.vx;p.y+=p.vy;p.vy+=0.2;p.life-=p.decay;if(p.life<=0){particles.splice(pi,1);continue;}ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.life;ctx.fill();ctx.globalAlpha=1;}for(var fi=floatingTexts.length-1;fi>=0;fi--){var ft=floatingTexts[fi];ft.y+=ft.vy;ft.life-=0.02;if(ft.life<=0){floatingTexts.splice(fi,1);continue;}ctx.font="bold "+ft.size+"px Arial";ctx.textAlign="center";ctx.fillStyle=ft.color;ctx.globalAlpha=ft.life;ctx.strokeStyle="#000";ctx.lineWidth=3;ctx.strokeText(ft.text,ft.x,ft.y);ctx.fillText(ft.text,ft.x,ft.y);ctx.globalAlpha=1;}if(player.dancing&&player.dance){player.danceFrame++;var px=canvas.width/2,py=canvas.height-80,grad=ctx.createRadialGradient(px,py+10,10,px,py+10,80);grad.addColorStop(0,player.dance.color+"aa");grad.addColorStop(1,"transparent");ctx.beginPath();ctx.ellipse(px,py+12,75,22,0,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();ctx.font="bold 15px Arial";ctx.textAlign="center";ctx.fillStyle=player.dance.color;ctx.globalAlpha=0.9;ctx.fillText("YOU",px,py-90);ctx.globalAlpha=1;drawStickFigure(px,py,player.danceFrame,player.dance.move,player.dance.color);if(player.danceFrame>=player.danceDuration){player.dancing=false;player.dance=null;}}updateBubbles();requestAnimationFrame(gameLoop);}
+for(var si=0;si<5;si++)(function(j){setTimeout(spawnHead,j*300);})(si);
 gameLoop();
 </script>
 </body>
